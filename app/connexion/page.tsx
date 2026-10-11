@@ -3,13 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { getMembers, setCurrentUser } from '@/lib/data/store';
-import { LogIn, ShieldCheck, CreditCard, Sparkles, UserCheck } from 'lucide-react';
+import { LogIn, ShieldCheck, UserCheck } from 'lucide-react';
 
 export default function ConnexionPage() {
   const [role, setRole] = useState<'member' | 'admin'>('member');
   const [memberNumber, setMemberNumber] = useState('');
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
@@ -17,34 +15,32 @@ export default function ConnexionPage() {
     setError('');
     const members = getMembers();
 
-    if (role === 'member') {
-      const cleanInput = memberNumber.trim().toUpperCase();
-      const normalizedInput = cleanInput.startsWith('AJPK-') ? cleanInput : `AJPK-${cleanInput.padStart(5, '0')}`;
-      
-      const found = members.find(m => 
-        m.member_number.toUpperCase() === cleanInput || 
-        m.member_number.toUpperCase() === normalizedInput
-      );
+    const cleanInput = memberNumber.trim().toUpperCase();
+    const normalizedInput = cleanInput.startsWith('AJPK-') ? cleanInput : `AJPK-${cleanInput.padStart(5, '0')}`;
+    
+    const found = members.find(m => 
+      m.member_number.toUpperCase() === cleanInput || 
+      m.member_number.toUpperCase() === normalizedInput
+    );
 
+    if (role === 'member') {
       if (found) {
         setCurrentUser(found);
         window.location.href = '/dashboard';
       } else {
-        setError(`Numéro d’adhérent introuvable. Assurez-vous d’être inscrit et de saisir le numéro exact (ex: AJPK-00001).`);
+        setError(`Numéro d’adhérent introuvable. Veuillez vérifier votre numéro unique.`);
       }
     } else {
-      // Espace Administration (par email ou par numéro adhérent AJPK-00011)
-      const cleanInput = adminEmail.trim().toLowerCase();
-      const foundAdmin = members.find(m => 
-        (m.role === 'admin' || m.role === 'super_admin') &&
-        (m.email.toLowerCase() === cleanInput || m.member_number.toLowerCase() === cleanInput)
-      );
-
-      if (foundAdmin) {
-        setCurrentUser(foundAdmin);
-        window.location.href = '/admin';
+      // Espace Administration : Vérifier que le numéro adhérent correspond à un admin ou super_admin
+      if (found) {
+        if (found.role === 'admin' || found.role === 'super_admin') {
+          setCurrentUser(found);
+          window.location.href = '/admin';
+        } else {
+          setError(`Le membre ${found.first_name} ${found.last_name} (${found.member_number}) n'a pas les droits d'administration.`);
+        }
       } else {
-        setError('Accès administrateur non autorisé ou identifiants incorrects.');
+        setError(`Numéro adhérent administrateur introuvable.`);
       }
     }
   };
@@ -59,12 +55,12 @@ export default function ConnexionPage() {
             AJPK
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            Espace Membre AJPK
+            {role === 'member' ? 'Espace Membre AJPK' : 'Espace Administration AJPK'}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {role === 'member'
               ? 'Connectez-vous à l’aide de votre numéro d’adhérent unique'
-              : 'Connexion réservée au bureau et aux administrateurs'}
+              : 'Accès réservé aux administrateurs via leur numéro d’adhérent'}
           </p>
         </div>
 
@@ -74,14 +70,14 @@ export default function ConnexionPage() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-5">
           
           <div className="space-y-1">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Type d’accès</label>
             <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
               <button
                 type="button"
-                onClick={() => { setRole('member'); setError(''); }}
+                onClick={() => { setRole('member'); setError(''); setMemberNumber(''); }}
                 className={`py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                   role === 'member'
                     ? 'bg-white dark:bg-slate-900 text-brand-700 dark:text-emerald-400 shadow-sm'
@@ -92,60 +88,36 @@ export default function ConnexionPage() {
               </button>
               <button
                 type="button"
-                onClick={() => { setRole('admin'); setError(''); }}
+                onClick={() => { setRole('admin'); setError(''); setMemberNumber(''); }}
                 className={`py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                   role === 'admin'
                     ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm'
                     : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" /> Admin
+                <ShieldCheck className="w-3.5 h-3.5" /> Espace Admin
               </button>
             </div>
           </div>
 
-          {role === 'member' ? (
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                <span>Numéro Adhérent Unique *</span>
-                <span className="text-[10px] text-brand-600 dark:text-emerald-400 font-mono font-bold">Format: AJPK-XXXXX</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={memberNumber}
-                onChange={(e) => setMemberNumber(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
-              <p className="text-[11px] text-slate-400">
-                Chaque membre possède un numéro propre inscrit sur sa carte officielle (ex: <strong>AJPK-00001</strong>).
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Administrateur *</label>
-                <input
-                  type="email"
-                  required
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Mot de passe *</label>
-                <input
-                  type="password"
-                  required
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
-            </>
-          )}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+              <span>{role === 'member' ? 'Numéro Adhérent Unique *' : 'Numéro Adhérent Administrateur *'}</span>
+              <span className="text-[10px] text-brand-600 dark:text-emerald-400 font-mono font-bold">Format: AJPK-XXXXX</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={memberNumber}
+              onChange={(e) => setMemberNumber(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+            <p className="text-[11px] text-slate-400">
+              {role === 'member'
+                ? 'Saisissez le numéro unique inscrit sur votre carte officielle (ex: AJPK-00011).'
+                : 'Saisissez votre numéro d’adhérent administrateur (ex: AJPK-00011).'}
+            </p>
+          </div>
 
           <button
             type="submit"
