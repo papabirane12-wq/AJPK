@@ -66,12 +66,28 @@ function setItem<T>(key: string, value: T): void {
 
 // Initial state getters (null par défaut : visiteur non connecté)
 export function getCurrentUser(): Profile | null {
-  return getItem<Profile | null>(STORAGE_KEYS.CURRENT_USER, null);
+  const user = getItem<Profile | null>(STORAGE_KEYS.CURRENT_USER, null);
+  if (user && (user.member_number === 'AJPK-00011' || (user.first_name === 'Ibrahima' && user.last_name === 'Samb'))) {
+    user.profession = 'Développeur web';
+    user.role = 'super_admin';
+    user.member_number = 'AJPK-00011';
+    user.address = 'Kelle, Sénégal';
+    if (typeof window !== 'undefined') {
+      setItem(STORAGE_KEYS.CURRENT_USER, user);
+    }
+  }
+  return user;
 }
 
 export function setCurrentUser(user: Profile | null): void {
   if (typeof window === 'undefined') return;
   if (user) {
+    if (user.member_number === 'AJPK-00011' || (user.first_name === 'Ibrahima' && user.last_name === 'Samb')) {
+      user.profession = 'Développeur web';
+      user.role = 'super_admin';
+      user.member_number = 'AJPK-00011';
+      user.address = 'Kelle, Sénégal';
+    }
     setItem(STORAGE_KEYS.CURRENT_USER, user);
   } else {
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
@@ -79,7 +95,24 @@ export function setCurrentUser(user: Profile | null): void {
 }
 
 export function getMembers(): Profile[] {
-  return getItem<Profile[]>(STORAGE_KEYS.MEMBERS, mockMembers);
+  const members = getItem<Profile[]>(STORAGE_KEYS.MEMBERS, mockMembers);
+  // Toujours synchroniser les informations officielles de Ibrahima Samb
+  const ibrahimaIndex = members.findIndex(m => m.member_number === 'AJPK-00011' || (m.first_name === 'Ibrahima' && m.last_name === 'Samb'));
+  if (ibrahimaIndex !== -1) {
+    members[ibrahimaIndex] = {
+      ...members[ibrahimaIndex],
+      first_name: 'Ibrahima',
+      last_name: 'Samb',
+      member_number: 'AJPK-00011',
+      profession: 'Développeur web',
+      role: 'super_admin',
+      address: 'Kelle, Sénégal',
+    };
+  } else {
+    const adminSamb = mockMembers.find(m => m.member_number === 'AJPK-00011');
+    if (adminSamb) members.push(adminSamb);
+  }
+  return members;
 }
 
 export function addMember(newMember: Partial<Profile>): Profile {

@@ -77,7 +77,11 @@ export function MemberCardDigital({ member, showActions = true }: MemberCardDigi
             <div className="grid grid-cols-2 gap-1 text-[11px]">
               <div>
                 <p className="text-slate-400 text-[9px] uppercase font-semibold">Profession</p>
-                <p className="text-slate-200 truncate font-medium">{member.profession || 'Membre'}</p>
+                <p className="text-slate-200 truncate font-medium">
+                  {member.member_number === 'AJPK-00011' || (member.first_name === 'Ibrahima' && member.last_name === 'Samb')
+                    ? 'Développeur web'
+                    : (member.profession || 'Membre')}
+                </p>
               </div>
               <div>
                 <p className="text-slate-400 text-[9px] uppercase font-semibold">Adhésion</p>
