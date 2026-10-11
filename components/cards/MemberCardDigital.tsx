@@ -92,7 +92,7 @@ export function MemberCardDigital({ member, showActions = true }: MemberCardDigi
         <div className="pt-4 border-t border-white/10 flex items-center justify-between relative z-10">
           <div>
             <p className="text-[10px] text-slate-400 font-medium">Scannez pour vérifier l’authenticité</p>
-            <p className="text-[11px] font-bold text-emerald-400 mt-0.5">Commune de Kelle, Sénégal</p>
+            <p className="text-[11px] font-bold text-emerald-400 mt-0.5">Kelle, Sénégal</p>
           </div>
           <div className="bg-white p-1 rounded-xl shadow-lg">
             <QRCodeView value={verificationUrl} size={64} />

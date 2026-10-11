@@ -33,17 +33,18 @@ export default function ConnexionPage() {
         setError(`Numéro d’adhérent introuvable. Assurez-vous d’être inscrit et de saisir le numéro exact (ex: AJPK-00001).`);
       }
     } else {
-      // Espace Administration
+      // Espace Administration (par email ou par numéro adhérent AJPK-00011)
+      const cleanInput = adminEmail.trim().toLowerCase();
       const foundAdmin = members.find(m => 
         (m.role === 'admin' || m.role === 'super_admin') &&
-        m.email.toLowerCase() === adminEmail.trim().toLowerCase()
+        (m.email.toLowerCase() === cleanInput || m.member_number.toLowerCase() === cleanInput)
       );
 
       if (foundAdmin) {
         setCurrentUser(foundAdmin);
         window.location.href = '/admin';
       } else {
-        setError('Accès administrateur non autorisé ou email incorrect.');
+        setError('Accès administrateur non autorisé ou identifiants incorrects.');
       }
     }
   };

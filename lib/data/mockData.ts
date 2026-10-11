@@ -245,6 +245,26 @@ export const mockMembers: Profile[] = [
     skills: ['Médiation sociale', 'Animation de groupe', 'Organisation d’événements'],
     interest_domains: ['Action sociale', 'Jeunesse', 'Théâtre forum'],
     status: 'actif'
+  },
+  {
+    id: 'usr-11',
+    email: 'ibrahima.samb@ajpk.sn',
+    first_name: 'Ibrahima',
+    last_name: 'Samb',
+    member_number: 'AJPK-00011',
+    phone: '+221 77 000 00 11',
+    date_of_birth: '1998-10-10',
+    sex: 'M',
+    address: 'Kelle, Sénégal',
+    profession: 'Développeur web',
+    education_level: 'Licence Informatique & Développement Web',
+    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+    bio: 'Administrateur de la plateforme AJPK & Développeur web engagé pour la jeunesse de Kelle.',
+    role: 'super_admin',
+    created_at: '2026-10-10T12:00:00Z',
+    skills: ['Développement web', 'Next.js', 'React', 'TypeScript', 'Administration Système'],
+    interest_domains: ['Technologie', 'Numérique', 'Jeunesse', 'Innovation'],
+    status: 'actif'
   }
 ];
 
