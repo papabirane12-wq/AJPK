@@ -131,8 +131,7 @@ export function PhoneInput({ value, onChange, required = true }: PhoneInputProps
             required={required}
             value={nationalNumber}
             onChange={(e) => handleNumberChange(e.target.value)}
-            placeholder={`Ex: ${selectedCountry.format}`}
-            className="w-full px-4 py-3 bg-transparent text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
+            className="w-full px-4 py-3 bg-transparent text-xs font-medium text-slate-900 dark:text-white focus:outline-none"
           />
         </div>
 

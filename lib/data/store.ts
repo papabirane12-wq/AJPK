@@ -84,7 +84,16 @@ export function getMembers(): Profile[] {
 
 export function addMember(newMember: Partial<Profile>): Profile {
   const members = getMembers();
-  const nextNum = members.length + 1;
+  
+  // Calculer un numéro adhérent unique strict (AJPK-XXXXX)
+  const existingNumbers = members
+    .map(m => {
+      const match = m.member_number.match(/AJPK-(\d+)/i);
+      return match ? parseInt(match[1], 10) : 0;
+    })
+    .filter(n => !isNaN(n));
+  const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
+  const nextNum = maxNum + 1;
   const member_number = `AJPK-${String(nextNum).padStart(5, '0')}`;
   
   const created: Profile = {

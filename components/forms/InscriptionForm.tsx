@@ -187,7 +187,6 @@ export function InscriptionForm() {
             required
             value={formData.first_name}
             onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-            placeholder="Ex: Ibrahima"
             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white"
           />
         </div>
@@ -199,7 +198,6 @@ export function InscriptionForm() {
             required
             value={formData.last_name}
             onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-            placeholder="Ex: Samb"
             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white"
           />
         </div>
@@ -219,7 +217,6 @@ export function InscriptionForm() {
             required
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            placeholder="Ex: Kelle Centre"
             className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white"
           />
         </div>
@@ -231,7 +228,6 @@ export function InscriptionForm() {
           type="text"
           value={formData.profession}
           onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-          placeholder="Ex: Étudiant, Éleveur, Commerçant, Développeur..."
           className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white"
         />
       </div>
@@ -286,7 +282,6 @@ export function InscriptionForm() {
             required
             value={paymentPhone || formData.phone}
             onChange={(e) => setPaymentPhone(e.target.value)}
-            placeholder="+221 77 000 00 00"
             className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white"
           />
         </div>
