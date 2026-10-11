@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
+import { createClient as createSupabaseJsClient } from '@supabase/supabase-js';
 
 export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -15,3 +16,8 @@ export function createClient() {
   }
   return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
+
+// Single instance for direct client-side operations
+export const supabase = isSupabaseConfigured 
+  ? createSupabaseJsClient(supabaseUrl, supabaseAnonKey) 
+  : null;

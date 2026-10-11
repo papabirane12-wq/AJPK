@@ -298,12 +298,11 @@ ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
--- Profiles Policy: Users can read public profiles; Users update own; Admin updates all.
+-- Profiles Policy: Users can read public profiles; Users insert own; Users update own
 CREATE POLICY "Public profiles are readable" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Admins full access profiles" ON public.profiles FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'super_admin'))
-);
+
 
 -- Events & Formations: Anyone can read, only admin can create/update/delete
 CREATE POLICY "Events readable by all" ON public.events FOR SELECT USING (true);

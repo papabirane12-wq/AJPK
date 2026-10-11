@@ -14,13 +14,13 @@ export function ProjectSubmissionForm({ onSuccess }: { onSuccess?: () => void })
     summary: '',
     problem: '',
     solution: '',
-    team_members: `${user.first_name} ${user.last_name}`,
+    team_members: user ? `${user.first_name} ${user.last_name}` : '',
     budget_fcfa: 2500000,
     funding_needed_fcfa: 1000000,
     needs_description: '',
     image_url: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&q=80&w=800',
-    contact_email: user.email,
-    contact_phone: user.phone,
+    contact_email: user?.email || '',
+    contact_phone: user?.phone || '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {

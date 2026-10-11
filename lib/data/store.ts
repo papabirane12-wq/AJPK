@@ -194,24 +194,29 @@ export function getProjects(): YouthProject[] {
   return getItem<YouthProject[]>(STORAGE_KEYS.PROJECTS, mockProjects);
 }
 
-export function addProject(project: Partial<YouthProject>, user: Profile): YouthProject {
+export function addProject(project: Partial<YouthProject>, user?: Profile | null): YouthProject {
   const projects = getProjects();
+  const authorId = user?.id || `anon-${Date.now()}`;
+  const authorName = user ? `${user.first_name} ${user.last_name}` : 'Porteur de Projet';
+  const authorEmail = user?.email || project.contact_email || 'contact@ajpk.sn';
+  const authorPhone = user?.phone || project.contact_phone || '+221 77 000 00 00';
+
   const created: YouthProject = {
     id: `proj-${Date.now()}`,
     title: project.title || 'Nouveau Projet Jeune',
-    author_id: user.id,
-    author_name: `${user.first_name} ${user.last_name}`,
+    author_id: authorId,
+    author_name: authorName,
     category: project.category || 'Innovation',
     summary: project.summary || '',
     problem: project.problem || '',
     solution: project.solution || '',
-    team_members: project.team_members || `${user.first_name} ${user.last_name}`,
+    team_members: project.team_members || authorName,
     budget_fcfa: project.budget_fcfa || 1000000,
     funding_needed_fcfa: project.funding_needed_fcfa || 500000,
     needs_description: project.needs_description || 'Accompagnement technique et matériel.',
     image_url: project.image_url || 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&q=80&w=800',
-    contact_email: project.contact_email || user.email,
-    contact_phone: project.contact_phone || user.phone,
+    contact_email: project.contact_email || authorEmail,
+    contact_phone: project.contact_phone || authorPhone,
     status: 'Soumis',
     created_at: new Date().toISOString()
   };

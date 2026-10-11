@@ -14,6 +14,7 @@ export default function AdminPartenairesPage() {
         <p className="text-xs text-slate-400 mt-1">Validez les demandes et gérez l’annuaire des entreprises partenaires.</p>
       </div>
 
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
         {partners.length === 0 ? (
           <div className="p-12 text-center text-slate-400">
             <Handshake className="w-12 h-12 text-slate-600 mx-auto mb-3" />

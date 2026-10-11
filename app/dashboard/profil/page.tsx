@@ -7,6 +7,15 @@ import { formatDateFr } from '@/lib/utils/formatters';
 export default function ProfilDashboardPage() {
   const user = getCurrentUser();
 
+  if (!user) {
+    return (
+      <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3 max-w-md mx-auto my-12">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Connexion requise</h2>
+        <p className="text-xs text-slate-500">Connectez-vous pour visualiser et gérer votre profil membre.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
