@@ -16,13 +16,44 @@ import {
   TrendingUp,
   Search
 } from 'lucide-react';
-import { mockEvents, mockFormations, mockProjects, mockMembers } from '@/lib/data/mockData';
+import { getMembers, getEvents, getFormations, getProjects, getOpportunities } from '@/lib/data/store';
+import { mockEvents, mockFormations, mockProjects } from '@/lib/data/mockData';
 import { EventCard } from '@/components/cards/EventCard';
 import { FormationCard } from '@/components/cards/FormationCard';
 import { ProjectCard } from '@/components/cards/ProjectCard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 export default function HomePage() {
+  const [memberCount, setMemberCount] = useState<number>(() => getMembers().length);
+  const [formationsCount, setFormationsCount] = useState<number>(() => getFormations().length);
+  const [opportunitiesCount, setOpportunitiesCount] = useState<number>(() => getOpportunities().length);
+  const [projectsCount, setProjectsCount] = useState<number>(() => getProjects().length);
+
+  useEffect(() => {
+    // 1. Charger depuis le store local
+    const localMembers = getMembers();
+    setMemberCount(localMembers.length);
+
+    // 2. Si Supabase est connecté, récupérer le nombre de membres validés/actifs en base
+    async function fetchDatabaseCounts() {
+      if (!supabase) return;
+      try {
+        const { count, error } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!error && typeof count === 'number' && count > 0) {
+          setMemberCount(count);
+        }
+      } catch (e) {
+        console.error('Erreur lecture compteurs Supabase:', e);
+      }
+    }
+
+    fetchDatabaseCounts();
+  }, []);
+
   return (
     <div className="space-y-24 pb-20 overflow-hidden">
       
@@ -64,19 +95,27 @@ export default function HomePage() {
           {/* Quick Stats Counter Grid */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             <div className="p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm text-center">
-              <p className="text-3xl sm:text-4xl font-black text-brand-600 dark:text-emerald-400">350+</p>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Membres Actifs</p>
+              <p className="text-3xl sm:text-4xl font-black text-brand-600 dark:text-emerald-400">
+                {memberCount}
+              </p>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Membres Validés</p>
             </div>
             <div className="p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm text-center">
-              <p className="text-3xl sm:text-4xl font-black text-amber-500">15+</p>
+              <p className="text-3xl sm:text-4xl font-black text-amber-500">
+                {formationsCount}
+              </p>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Formations Délivrées</p>
             </div>
             <div className="p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm text-center">
-              <p className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400">25+</p>
+              <p className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400">
+                {opportunitiesCount}
+              </p>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Opportunités Publiées</p>
             </div>
             <div className="p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm text-center">
-              <p className="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400">12</p>
+              <p className="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400">
+                {projectsCount}
+              </p>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Projets en Incubation</p>
             </div>
           </div>
