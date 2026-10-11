@@ -73,7 +73,7 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Bienvenue sur le portail citoyen et professionnel de l’<strong>Association de la Jeunesse Polyvalente de Kelle</strong>. Formations certifiantes, opportunités d’emploi, bourses d’étude, incubation de projets et réseau des talents locaux.
+            Bienvenue sur le portail de l’<strong>Association de la Jeunesse Polyvalente de Kelle</strong>. Formations certifiantes, opportunités d’emploi, incubation de projets et réseau des talents locaux.
           </p>
 
           {/* Action CTAs */}
@@ -130,7 +130,7 @@ export default function HomePage() {
             AJPK en action
           </h2>
           <h3 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-2">
-            Nos piliers stratégiques pour la jeunesse de Kelle
+            Nos piliers stratégiques pour la jeunesse
           </h3>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
             L’Association de la Jeunesse Polyvalente de Kelle œuvre quotidiennement à travers quatre commissions d’action thématiques.
@@ -174,7 +174,7 @@ export default function HomePage() {
             </div>
             <h4 className="text-xl font-bold text-slate-900 dark:text-white">Culture, Sport & Santé</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
-              Tournois navétanes inter-quartiers, festivals culturels, dons de sang communautaires et secourisme civique.
+              Tournois inter-quartiers, festivals culturels, dons de sang communautaires et secourisme civique.
             </p>
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function HomePage() {
               Incubateur Local
             </h2>
             <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-              Projets Portés par les Jeunes de Kelle
+              Projets Portés par les Jeunes
             </h3>
           </div>
           <Link

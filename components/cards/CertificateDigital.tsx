@@ -29,7 +29,7 @@ export function CertificateDigital({ certificate }: CertificateDigitalProps) {
             </div>
             
             <h4 className="text-xs font-sans uppercase font-extrabold tracking-widest text-slate-500">
-              RÉPUBLIQUE DU SÉNÉGAL • COMMUNE DE KELLE
+              RÉPUBLIQUE DU SÉNÉGAL • COMMUNE DE YENE
             </h4>
             <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-emerald-900 uppercase">
               Association de la Jeunesse Polyvalente de Kelle

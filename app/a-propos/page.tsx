@@ -26,7 +26,7 @@ export default function AProposPage() {
           </div>
           <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">Notre Vision</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
-            Faire de Kelle une commune pilote où chaque jeune est autonome, formé aux compétences du XXIe siècle et acteur direct de la prospérité économique et sociale de son terroir.
+            Faire de Yene une commune pilote où chaque jeune est autonome, formé aux compétences du XXIe siècle et acteur direct de la prospérité économique et sociale de son terroir.
           </p>
         </div>
 

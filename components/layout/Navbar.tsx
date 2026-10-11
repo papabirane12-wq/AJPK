@@ -165,12 +165,7 @@ export function Navbar() {
                 >
                   Connexion
                 </Link>
-                <Link
-                  href="/inscription"
-                  className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-brand-600 via-emerald-600 to-gold-500 hover:from-brand-700 hover:via-emerald-700 hover:to-gold-600 shadow-md shadow-brand-600/25 transition-all hover:scale-[1.02]"
-                >
-                  Devenir Membre
-                </Link>
+                
               </div>
             )}
           </div>

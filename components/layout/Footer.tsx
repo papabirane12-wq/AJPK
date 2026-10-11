@@ -20,7 +20,7 @@ export function Footer() {
             </Link>
 
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
-              « Une jeunesse engagée, des compétences au service du développement. » <br />
+              
               L’AJPK est l’écosystème numérique et citoyen fédérant les jeunes de Kelle pour la formation, l’emploi, l’entrepreneuriat et le développement local.
             </p>
 
@@ -58,19 +58,19 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-slate-400">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                <span>Siège AJPK, Foyer des Jeunes, Quartier Léona, Kelle, Sénégal</span>
+                <span>Kelle, Sénégal</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+221 77 123 45 67 / +221 78 234 56 78</span>
+                <span>+221 78 889 52 84</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>contact@ajpk.sn</span>
+                <span>ajpk.senegal@gmail.com</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>www.ajpk.sn</span>
+                <span>www.ajpk.org</span>
               </li>
             </ul>
           </div>

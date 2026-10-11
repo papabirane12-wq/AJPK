@@ -211,7 +211,7 @@ export function InscriptionForm() {
         />
 
         <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Adresse / Village ou Quartier *</label>
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Adresse *</label>
           <input
             type="text"
             required
@@ -223,7 +223,7 @@ export function InscriptionForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Profession / Activité</label>
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Profession *</label>
         <input
           type="text"
           value={formData.profession}
@@ -244,7 +244,7 @@ export function InscriptionForm() {
               Cotisation d’entrée ouvrant droit à la carte de membre certifiée et aux avantages du réseau AJPK.
             </p>
           </div>
-          <span className="text-base font-black text-emerald-600 dark:text-emerald-400">1 050 FCFA</span>
+          
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -296,7 +296,7 @@ export function InscriptionForm() {
           <>Paiement de 1 050 FCFA en cours...</>
         ) : (
           <>
-            <ShieldCheck className="w-5 h-5" /> Payer 1 050 FCFA & Générer ma Carte Officielle
+            <ShieldCheck className="w-5 h-5" /> Valider
           </>
         )}
       </button>

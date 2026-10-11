@@ -112,11 +112,7 @@ export default function ConnexionPage() {
               onChange={(e) => setMemberNumber(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
-            <p className="text-[11px] text-slate-400">
-              {role === 'member'
-                ? 'Saisissez le numéro unique inscrit sur votre carte officielle (ex: AJPK-00011).'
-                : 'Saisissez votre numéro d’adhérent administrateur (ex: AJPK-00011).'}
-            </p>
+            
           </div>
 
           <button
@@ -130,7 +126,7 @@ export default function ConnexionPage() {
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500">
           Pas encore membre ?{' '}
           <Link href="/inscription" className="font-bold text-brand-600 dark:text-emerald-400 hover:underline">
-            Adhérer & Obtenir ma Carte (1 050 FCFA)
+            Adhérer & Obtenir ma Carte 
           </Link>
         </div>
 
