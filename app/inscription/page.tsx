@@ -11,7 +11,7 @@ export default function InscriptionPage() {
           Devenir Membre de l’AJPK
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-          Rejoignez le réseau dynamique des jeunes de Kelle et obtenez votre carte membre numérique unique.
+          Frais d’adhésion officielle & délivrance de la carte numérique : <strong className="text-emerald-600 dark:text-emerald-400 font-extrabold">1 050 FCFA</strong> (payable via Wave ou Orange Money).
         </p>
       </div>
 

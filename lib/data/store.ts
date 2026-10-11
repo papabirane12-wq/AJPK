@@ -110,6 +110,22 @@ export function addMember(newMember: Partial<Profile>): Profile {
 
   const updated = [created, ...members];
   setItem(STORAGE_KEYS.MEMBERS, updated);
+
+  // Enregistrer le reçu de paiement de l'adhésion (1 050 FCFA)
+  const cots = getCotisations();
+  const adhesionCotisation: Cotisation = {
+    id: `cot-${Date.now()}`,
+    member_id: created.id,
+    member_name: `${created.first_name} ${created.last_name}`,
+    member_number: created.member_number,
+    amount_fcfa: 1050,
+    period: 'Frais d’Adhésion & Carte',
+    status: 'paye',
+    payment_date: new Date().toISOString().split('T')[0],
+    method: 'Wave / Orange Money'
+  };
+  setItem(STORAGE_KEYS.COTISATIONS, [adhesionCotisation, ...cots]);
+
   return created;
 }
 
