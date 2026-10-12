@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     };
 
     if (method === 'om') {
-      action = 'create_orange_qr';
+      action = 'create_orange_om';
       payload = {
         amount: Number(amount),
         customer_number: cleanPhone,
