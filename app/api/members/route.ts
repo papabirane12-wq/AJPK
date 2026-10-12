@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Profile } from '@/types';
-import { mockMembers } from '@/lib/data/mockData';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://yfhcfplybkozeloaezzj.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -20,60 +19,60 @@ function avatarPreviewOrEmpty(url?: string): string {
   return '';
 }
 
-// Fonction pour synchroniser en direct les paiements Unitech Pay avec Supabase
-async function syncUnitechPaymentsWithSupabase() {
+export async function GET() {
   try {
+    // 1. Interroger directement l'API officielle Unitech Pay
     const res = await fetch(`${UNITECH_API_URL}?action=transactions`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${UNITECH_API_KEY}` },
       cache: 'no-store',
     });
-    const data = await res.json();
-    if (!res.ok || !data.success) return;
 
-    const completed = (data.data?.transactions || []).filter(
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return NextResponse.json({ success: false, message: 'Erreur Unitech Pay' }, { status: 500 });
+    }
+
+    // 2. FILTRER STRICTEMENT LES PAIEMENTS VALIDÉS (status === 'completed' et montant === 1050)
+    const completedTransactions: any[] = (data.data?.transactions || []).filter(
       (t: any) => t.status === 'completed' && parseFloat(t.amount) === 1050
     );
 
-    // Trier par date croissante (du plus ancien au plus récent) pour attribuer l'ordre chronologique
-    completed.sort(
+    // Trier par ordre chronologique de paiement (du plus ancien au plus récent)
+    completedTransactions.sort(
       (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
 
-    // Récupérer les messages existants
-    const { data: existingRows } = await supabase
-      .from('contact_messages')
-      .select('subject, message')
-      .like('subject', 'AJPK_MEMBER:%');
+    // 3. Récupérer les photos de profil uploadées depuis Supabase contact_messages
+    const avatarMap = new Map<string, string>();
+    try {
+      const { data: messages } = await supabase
+        .from('contact_messages')
+        .select('message')
+        .like('subject', 'AJPK_MEMBER:%');
 
-    const knownRefs = new Set<string>();
-    const knownPhones = new Set<string>();
-    const existingNums: number[] = [11];
-
-    for (const row of existingRows || []) {
-      const match = row.subject?.match(/AJPK-(\d+)/i);
-      if (match) existingNums.push(parseInt(match[1], 10));
-
-      try {
-        const m = JSON.parse(row.message);
-        if (m.payment_ref) knownRefs.add(m.payment_ref);
-        if (m.phone) knownPhones.add(m.phone.replace(/[^0-9]/g, ''));
-      } catch {
-        // Ignorer
+      if (messages) {
+        for (const row of messages) {
+          try {
+            const m = JSON.parse(row.message);
+            if (m.avatar_url && (m.phone || m.payment_ref)) {
+              if (m.payment_ref) avatarMap.set(m.payment_ref, m.avatar_url);
+              if (m.phone) avatarMap.set(m.phone.replace(/[^0-9]/g, ''), m.avatar_url);
+            }
+          } catch {
+            // Ignorer
+          }
+        }
       }
+    } catch (e) {
+      console.error('Erreur lecture avatars:', e);
     }
 
-    let nextNumber = Math.max(...existingNums.filter((n) => !isNaN(n) && n > 0)) + 1;
-
-    for (const t of completed) {
+    // 4. Construire la liste EXCLUSIVE des membres à partir des paiements validés
+    const membersList: Profile[] = completedTransactions.map((t, index) => {
       const cleanPhone = (t.customer_number || '').replace(/[^0-9]/g, '');
 
-      // Déjà enregistré
-      if (knownRefs.has(t.reference) || (cleanPhone && knownPhones.has(cleanPhone))) {
-        continue;
-      }
-
-      let fullName = 'Membre Adhérent';
+      let fullName = 'Adhérent';
       try {
         const meta = typeof t.metadata === 'string' ? JSON.parse(t.metadata) : t.metadata;
         if (meta?.description) {
@@ -83,26 +82,29 @@ async function syncUnitechPaymentsWithSupabase() {
         // Ignorer
       }
 
-      const parts = fullName.split(/\s+/);
-      const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0];
+      const parts = fullName.split(/\s+/).filter(Boolean);
+      const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0] || 'Membre';
       const lastName = parts.length > 1 ? parts[parts.length - 1] : 'AJPK';
-      const memberNumber = `AJPK-${String(nextNumber).padStart(5, '0')}`;
-      nextNumber++;
 
-      const memberObj: Profile & { payment_ref?: string; payment_method?: string; payment_amount?: number } = {
+      // Numéro d'adhérent strictement unique attribué dans l'ordre chronologique de validation
+      const member_number = `AJPK-${String(index + 1).padStart(5, '0')}`;
+
+      const avatar = avatarMap.get(t.reference) || avatarMap.get(cleanPhone) || '';
+
+      const memberObj: Profile & { payment_ref: string; payment_method: string; payment_amount: number; payment_date: string } = {
         id: `usr-unitech-${t.id}`,
         first_name: firstName,
         last_name: lastName,
         email: `${firstName.toLowerCase().replace(/[^a-z0-9]/g, '')}.${lastName.toLowerCase().replace(/[^a-z0-9]/g, '') || cleanPhone}@ajpk.sn`,
         phone: cleanPhone.startsWith('221') ? `+${cleanPhone}` : `+221 ${cleanPhone}`,
-        member_number: memberNumber,
+        member_number,
         address: 'Commune de Kelle',
-        profession: 'Membre AJPK',
-        date_of_birth: '2000-01-01',
+        profession: 'Membre Adhérent',
+        date_of_birth: '',
         sex: 'M',
-        education_level: 'Baccalauréat',
-        avatar_url: '',
-        bio: 'Membre actif engagé pour le développement de Kelle.',
+        education_level: 'Membre AJPK',
+        avatar_url: avatarPreviewOrEmpty(avatar),
+        bio: 'Adhérent officiel de l’Association de la Jeunesse Polyvalente de Kelle.',
         role: 'member',
         status: 'actif',
         created_at: t.created_at ? new Date(t.created_at).toISOString() : new Date().toISOString(),
@@ -111,98 +113,14 @@ async function syncUnitechPaymentsWithSupabase() {
         payment_ref: t.reference,
         payment_method: t.method === 'wave' ? 'Wave Sénégal' : 'Orange Money',
         payment_amount: 1050,
+        payment_date: t.created_at,
       };
 
-      await supabase.from('contact_messages').insert({
-        name: fullName,
-        email: memberObj.email,
-        subject: `AJPK_MEMBER:${memberNumber}`,
-        message: JSON.stringify(memberObj),
-      });
+      return memberObj;
+    });
 
-      knownRefs.add(t.reference);
-      if (cleanPhone) knownPhones.add(cleanPhone);
-    }
-  } catch (err) {
-    console.error('Erreur synchronisation Unitech Pay:', err);
-  }
-}
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const syncParam = searchParams.get('sync');
-
-    // Toujours vérifier et synchroniser avec Unitech Pay pour ne rater aucun paiement validé
-    if (syncParam !== 'false') {
-      await syncUnitechPaymentsWithSupabase();
-    }
-
-    const allMembersMap = new Map<string, Profile>();
-
-    // 1. Ajouter les membres statiques de base (admin officiel Ibrahima Samb AJPK-00011)
-    for (const m of mockMembers) {
-      allMembersMap.set(m.member_number, m);
-    }
-
-    // 2. Récupérer les profils enregistrés dans la table Supabase `profiles`
-    try {
-      const { data: dbProfiles } = await supabase.from('profiles').select('*');
-      if (dbProfiles && Array.isArray(dbProfiles)) {
-        for (const p of dbProfiles) {
-          if (!p.member_number || p.member_number === 'AJPK-99998') continue;
-          const profileObj: Profile = {
-            id: p.id || `usr-${p.member_number}`,
-            email: p.email,
-            first_name: p.first_name,
-            last_name: p.last_name,
-            member_number: p.member_number,
-            phone: p.phone || '',
-            date_of_birth: p.date_of_birth || '',
-            sex: (p.sex as 'M' | 'F') || 'M',
-            address: p.address || 'Kelle',
-            profession: p.profession || 'Membre AJPK',
-            education_level: p.education_level || '',
-            avatar_url: p.avatar_url || '',
-            bio: p.bio || '',
-            role: (p.role as Profile['role']) || 'member',
-            status: (p.status as Profile['status']) || 'actif',
-            created_at: p.created_at || new Date().toISOString(),
-            skills: [],
-            interest_domains: [],
-          };
-          allMembersMap.set(p.member_number, profileObj);
-        }
-      }
-    } catch (err) {
-      console.error('Erreur lecture profiles Supabase:', err);
-    }
-
-    // 3. Récupérer les membres enregistrés dans le registre central `contact_messages`
-    try {
-      const { data: syncMessages } = await supabase
-        .from('contact_messages')
-        .select('*')
-        .like('subject', 'AJPK_MEMBER:%');
-
-      if (syncMessages && Array.isArray(syncMessages)) {
-        for (const row of syncMessages) {
-          try {
-            const memberObj: Profile = JSON.parse(row.message);
-            if (memberObj && memberObj.member_number) {
-              allMembersMap.set(memberObj.member_number, memberObj);
-            }
-          } catch {
-            // Ignorer JSON invalide
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Erreur lecture contact_messages Supabase:', err);
-    }
-
-    // Convertir en tableau trié par date de création décroissante
-    const membersList = Array.from(allMembersMap.values()).sort((a, b) => {
+    // Tri par numéro d'adhérent décroissant (les derniers inscrits en premier)
+    membersList.sort((a, b) => {
       const numA = parseInt(a.member_number.replace(/[^0-9]/g, ''), 10) || 0;
       const numB = parseInt(b.member_number.replace(/[^0-9]/g, ''), 10) || 0;
       return numB - numA;
@@ -215,97 +133,47 @@ export async function GET(request: Request) {
     });
   } catch (error: unknown) {
     console.error('Erreur GET /api/members:', error);
-    return NextResponse.json({ success: false, members: mockMembers, count: mockMembers.length }, { status: 500 });
+    return NextResponse.json({ success: false, members: [], count: 0 }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { first_name, last_name, email, phone, address, profession, avatar_url, role = 'member' } = body;
+    const { first_name, last_name, email, phone, address, profession, avatar_url, role = 'member', payment_ref, payment_method } = body;
 
     if (!first_name || !last_name) {
       return NextResponse.json({ success: false, message: 'Prénom et nom obligatoires.' }, { status: 400 });
     }
 
-    // 1. Récupérer TOUS les numéros de membres existants pour garantir l'unicité stricte
-    const existingNumbers: number[] = [11]; // Ibrahima Samb est au minimum AJPK-00011
-
-    // Vérifier dans `profiles`
-    try {
-      const { data: dbProfiles } = await supabase.from('profiles').select('member_number');
-      if (dbProfiles) {
-        for (const p of dbProfiles) {
-          const match = p.member_number?.match(/AJPK-(\d+)/i);
-          if (match) existingNumbers.push(parseInt(match[1], 10));
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    // Vérifier dans `contact_messages`
-    try {
-      const { data: syncMessages } = await supabase
-        .from('contact_messages')
-        .select('subject')
-        .like('subject', 'AJPK_MEMBER:%');
-
-      if (syncMessages) {
-        for (const row of syncMessages) {
-          const match = row.subject?.match(/AJPK-(\d+)/i);
-          if (match) existingNumbers.push(parseInt(match[1], 10));
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    // Calculer le prochain numéro STRICTEMENT UNIQUE
-    const maxNumber = Math.max(...existingNumbers.filter((n) => !isNaN(n) && n > 0));
-    const nextNumber = maxNumber + 1;
-    const member_number = `AJPK-${String(nextNumber).padStart(5, '0')}`;
-
+    // Sauvegarder la photo et les coordonnées dans Supabase contact_messages
     const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
     const cleanEmail = email || `${first_name.toLowerCase().replace(/\s+/g, '')}.${last_name.toLowerCase().replace(/\s+/g, '') || cleanPhone}@ajpk.sn`;
 
-    const newMember: Profile = {
-      id: `usr-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      email: cleanEmail,
+    const newMemberRecord = {
       first_name: first_name.trim(),
       last_name: last_name.trim(),
-      member_number,
+      email: cleanEmail,
       phone: phone || '',
-      date_of_birth: '2000-01-01',
-      sex: 'M',
       address: address || 'Commune de Kelle',
       profession: profession || 'Membre AJPK',
-      education_level: 'Baccalauréat',
       avatar_url: avatarPreviewOrEmpty(avatar_url),
-      bio: 'Membre actif engagé pour le développement de Kelle.',
-      role: role as Profile['role'],
+      payment_ref: payment_ref || '',
+      payment_method: payment_method || '',
+      payment_amount: 1050,
       created_at: new Date().toISOString(),
-      skills: [],
-      interest_domains: [],
-      status: 'actif',
     };
 
-    // Enregistrer de manière centralisée dans `contact_messages`
-    try {
-      await supabase.from('contact_messages').insert({
-        name: `${newMember.first_name} ${newMember.last_name}`,
-        email: newMember.email,
-        subject: `AJPK_MEMBER:${newMember.member_number}`,
-        message: JSON.stringify(newMember),
-      });
-    } catch (syncErr) {
-      console.error('Erreur enregistrement contact_messages Supabase:', syncErr);
-    }
+    await supabase.from('contact_messages').insert({
+      name: `${first_name} ${last_name}`,
+      email: cleanEmail,
+      subject: `AJPK_MEMBER:${payment_ref || cleanPhone}`,
+      message: JSON.stringify(newMemberRecord),
+    });
 
     return NextResponse.json({
       success: true,
-      member: newMember,
-      message: 'Membre enregistré avec succès avec numéro unique.',
+      message: 'Informations d’adhésion enregistrées avec succès.',
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Erreur serveur';

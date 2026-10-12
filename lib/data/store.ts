@@ -105,37 +105,15 @@ export function setCurrentUser(user: Profile | null): void {
 }
 
 export function getMembers(): Profile[] {
-  const rawMembers = getItem<Profile[]>(STORAGE_KEYS.MEMBERS, mockMembers);
+  const rawMembers = getItem<Profile[]>(STORAGE_KEYS.MEMBERS, []);
   // Supprimer définitivement les anciens membres simulés stockés en cache
   const members = rawMembers.filter(m => !SIMULATED_IDS.has(m.id));
-
-  // Toujours synchroniser les informations officielles de Ibrahima Samb
-  const ibrahimaIndex = members.findIndex(m => m.member_number === 'AJPK-00011' || (m.first_name === 'Ibrahima' && m.last_name === 'Samb'));
-  if (ibrahimaIndex !== -1) {
-    members[ibrahimaIndex] = {
-      ...members[ibrahimaIndex],
-      first_name: 'Ibrahima',
-      last_name: 'Samb',
-      member_number: 'AJPK-00011',
-      profession: 'Développeur web',
-      role: 'super_admin',
-      address: 'Kelle, Sénégal',
-      avatar_url: members[ibrahimaIndex].avatar_url?.includes('unsplash') ? '' : (members[ibrahimaIndex].avatar_url || ''),
-    };
-  } else {
-    const adminSamb = mockMembers.find(m => m.member_number === 'AJPK-00011');
-    if (adminSamb) members.push(adminSamb);
-  }
 
   // Nettoyer toute photo de membre simulée (Unsplash)
   for (const m of members) {
     if (m.avatar_url && (m.avatar_url.includes('unsplash') || m.avatar_url.includes('images.unsplash.com'))) {
       m.avatar_url = '';
     }
-  }
-
-  if (typeof window !== 'undefined' && members.length !== rawMembers.length) {
-    setItem(STORAGE_KEYS.MEMBERS, members);
   }
 
   return members;
@@ -153,7 +131,7 @@ export function addMember(newMember: Partial<Profile>): Profile {
         return match ? parseInt(match[1], 10) : 0;
       })
       .filter(n => !isNaN(n));
-    const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers, 11) : 11;
+    const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers, 0) : 0;
     const nextNum = maxNum + 1;
     member_number = `AJPK-${String(nextNum).padStart(5, '0')}`;
   }
