@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { 
   getMembers, 
   getEvents, 
@@ -10,6 +11,7 @@ import {
   getCotisations,
   getCotisationsSummary 
 } from '@/lib/data/store';
+import { Profile } from '@/types';
 import { StatCard } from '@/components/ui/StatCard';
 import { formatFCFA } from '@/lib/utils/formatters';
 import { Users, Calendar, BookOpen, Briefcase, Rocket, Handshake, DollarSign, ShieldCheck, Wallet, ArrowRight } from 'lucide-react';
@@ -30,7 +32,19 @@ import {
 } from 'recharts';
 
 export default function AdminOverviewPage() {
-  const members = getMembers();
+  const [members, setMembers] = useState<Profile[]>(() => getMembers());
+
+  useEffect(() => {
+    fetch('/api/members')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.members)) {
+          setMembers(data.members);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const events = getEvents();
   const formations = getFormations();
   const opps = getOpportunities();

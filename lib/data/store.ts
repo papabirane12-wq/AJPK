@@ -144,19 +144,22 @@ export function getMembers(): Profile[] {
 export function addMember(newMember: Partial<Profile>): Profile {
   const members = getMembers();
   
-  // Calculer un numéro adhérent unique strict (AJPK-XXXXX)
-  const existingNumbers = members
-    .map(m => {
-      const match = m.member_number.match(/AJPK-(\d+)/i);
-      return match ? parseInt(match[1], 10) : 0;
-    })
-    .filter(n => !isNaN(n));
-  const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
-  const nextNum = maxNum + 1;
-  const member_number = `AJPK-${String(nextNum).padStart(5, '0')}`;
+  // Utiliser le numéro attribué par le serveur central ou calculer le prochain
+  let member_number = newMember.member_number;
+  if (!member_number) {
+    const existingNumbers = members
+      .map(m => {
+        const match = m.member_number.match(/AJPK-(\d+)/i);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .filter(n => !isNaN(n));
+    const maxNum = existingNumbers.length > 0 ? Math.max(...existingNumbers, 11) : 11;
+    const nextNum = maxNum + 1;
+    member_number = `AJPK-${String(nextNum).padStart(5, '0')}`;
+  }
   
   const created: Profile = {
-    id: `usr-${Date.now()}`,
+    id: newMember.id || `usr-${Date.now()}`,
     email: newMember.email || 'membre@ajpk.sn',
     first_name: newMember.first_name || '',
     last_name: newMember.last_name || '',
@@ -170,14 +173,23 @@ export function addMember(newMember: Partial<Profile>): Profile {
     avatar_url: newMember.avatar_url || '',
     bio: newMember.bio || 'Jeune engagé pour le développement de Kelle.',
     role: 'member',
-    created_at: new Date().toISOString(),
+    created_at: newMember.created_at || new Date().toISOString(),
     skills: newMember.skills || ['Communication', 'Travail d’équipe'],
     interest_domains: newMember.interest_domains || ['Jeunesse', 'Développement local'],
     status: 'actif'
   };
 
-  const updated = [created, ...members];
+  const updated = [created, ...members.filter(m => m.member_number !== created.member_number)];
   setItem(STORAGE_KEYS.MEMBERS, updated);
+
+  // Synchronisation avec le registre central Supabase si côté client
+  if (typeof window !== 'undefined' && !newMember.member_number) {
+    fetch('/api/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(created),
+    }).catch(e => console.error('Erreur synchronisation API membres:', e));
+  }
 
   // Enregistrer le reçu de paiement de l'adhésion officielle (1 050 FCFA)
   const cots = getCotisations();

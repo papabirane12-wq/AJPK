@@ -77,21 +77,47 @@ export function InscriptionForm() {
           const cleanPhone = (parsedReg.phone || '').replace(/[^0-9]/g, '');
           const autoEmail = `${(parsedReg.first_name || '').toLowerCase().replace(/\s+/g, '')}.${(parsedReg.last_name || '').toLowerCase().replace(/\s+/g, '') || cleanPhone}@ajpk.sn`;
 
-          const member = addMember({
-            first_name: (parsedReg.first_name || '').trim(),
-            last_name: (parsedReg.last_name || '').trim(),
-            email: autoEmail,
-            phone: parsedReg.phone || '',
-            address: parsedReg.address || 'Commune de Kelle',
-            profession: parsedReg.profession || 'Membre AJPK',
-            avatar_url: parsedReg.avatar_url || '',
-            date_of_birth: '',
-            sex: 'M',
-            education_level: '',
-            bio: '',
-            skills: [],
-            interest_domains: [],
-          });
+          let member: Profile;
+          try {
+            // Enregistrement central dans Supabase avec calcul du prochain numéro d'adhérent unique
+            const apiRes = await fetch('/api/members', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                first_name: parsedReg.first_name,
+                last_name: parsedReg.last_name,
+                email: autoEmail,
+                phone: parsedReg.phone,
+                address: parsedReg.address,
+                profession: parsedReg.profession,
+                avatar_url: parsedReg.avatar_url,
+              }),
+            });
+            const apiData = await apiRes.json();
+            if (apiData.success && apiData.member) {
+              member = addMember(apiData.member);
+            } else {
+              member = addMember({
+                first_name: (parsedReg.first_name || '').trim(),
+                last_name: (parsedReg.last_name || '').trim(),
+                email: autoEmail,
+                phone: parsedReg.phone || '',
+                address: parsedReg.address || 'Commune de Kelle',
+                profession: parsedReg.profession || 'Membre AJPK',
+                avatar_url: parsedReg.avatar_url || '',
+              });
+            }
+          } catch {
+            member = addMember({
+              first_name: (parsedReg.first_name || '').trim(),
+              last_name: (parsedReg.last_name || '').trim(),
+              email: autoEmail,
+              phone: parsedReg.phone || '',
+              address: parsedReg.address || 'Commune de Kelle',
+              profession: parsedReg.profession || 'Membre AJPK',
+              avatar_url: parsedReg.avatar_url || '',
+            });
+          }
 
           setCurrentUser(member);
           setCreatedMember(member);
@@ -229,21 +255,46 @@ export function InscriptionForm() {
         const cleanPhone = (parsedReg.phone || '').replace(/[^0-9]/g, '');
         const autoEmail = `${(parsedReg.first_name || '').toLowerCase().replace(/\s+/g, '')}.${(parsedReg.last_name || '').toLowerCase().replace(/\s+/g, '') || cleanPhone}@ajpk.sn`;
 
-        const member = addMember({
-          first_name: (parsedReg.first_name || '').trim(),
-          last_name: (parsedReg.last_name || '').trim(),
-          email: autoEmail,
-          phone: parsedReg.phone || '',
-          address: parsedReg.address || 'Commune de Kelle',
-          profession: parsedReg.profession || 'Membre AJPK',
-          avatar_url: parsedReg.avatar_url || '',
-          date_of_birth: '',
-          sex: 'M',
-          education_level: '',
-          bio: '',
-          skills: [],
-          interest_domains: [],
-        });
+        let member: Profile;
+        try {
+          const apiRes = await fetch('/api/members', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              first_name: parsedReg.first_name,
+              last_name: parsedReg.last_name,
+              email: autoEmail,
+              phone: parsedReg.phone,
+              address: parsedReg.address,
+              profession: parsedReg.profession,
+              avatar_url: parsedReg.avatar_url,
+            }),
+          });
+          const apiData = await apiRes.json();
+          if (apiData.success && apiData.member) {
+            member = addMember(apiData.member);
+          } else {
+            member = addMember({
+              first_name: (parsedReg.first_name || '').trim(),
+              last_name: (parsedReg.last_name || '').trim(),
+              email: autoEmail,
+              phone: parsedReg.phone || '',
+              address: parsedReg.address || 'Commune de Kelle',
+              profession: parsedReg.profession || 'Membre AJPK',
+              avatar_url: parsedReg.avatar_url || '',
+            });
+          }
+        } catch {
+          member = addMember({
+            first_name: (parsedReg.first_name || '').trim(),
+            last_name: (parsedReg.last_name || '').trim(),
+            email: autoEmail,
+            phone: parsedReg.phone || '',
+            address: parsedReg.address || 'Commune de Kelle',
+            profession: parsedReg.profession || 'Membre AJPK',
+            avatar_url: parsedReg.avatar_url || '',
+          });
+        }
 
         setCurrentUser(member);
         setCreatedMember(member);
@@ -478,25 +529,35 @@ export function InscriptionForm() {
           <button
             type="button"
             onClick={() => setPaymentMethod('wave')}
-            className={`p-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-extrabold transition ${
+            className={`p-3 rounded-2xl border-2 flex items-center justify-center gap-3 text-xs font-black transition shadow-sm ${
               paymentMethod === 'wave'
-                ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 ring-2 ring-sky-500/30'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                ? 'border-sky-500 bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-2 ring-sky-500/30'
+                : 'border-slate-200 dark:border-slate-700 hover:border-sky-300 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Wave Sénégal
+            <img
+              src="/icons/wave.png"
+              alt="Wave"
+              className="w-7 h-7 object-contain rounded-lg shrink-0 shadow-sm"
+            />
+            <span>Wave Sénégal</span>
           </button>
 
           <button
             type="button"
             onClick={() => setPaymentMethod('om')}
-            className={`p-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-extrabold transition ${
+            className={`p-3 rounded-2xl border-2 flex items-center justify-center gap-3 text-xs font-black transition shadow-sm ${
               paymentMethod === 'om'
-                ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500/30'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                ? 'border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500/30'
+                : 'border-slate-200 dark:border-slate-700 hover:border-amber-300 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Orange Money
+            <img
+              src="/icons/orange-money.png"
+              alt="Orange Money"
+              className="w-7 h-7 object-contain rounded-lg shrink-0 shadow-sm"
+            />
+            <span>Orange Money</span>
           </button>
         </div>
 
@@ -517,10 +578,10 @@ export function InscriptionForm() {
       <button
         type="submit"
         disabled={isCompressingPhoto || isRedirecting}
-        className={`w-full py-4 rounded-2xl text-white font-extrabold text-sm shadow-xl transition flex items-center justify-center gap-2 disabled:opacity-50 ${
+        className={`w-full py-4 rounded-2xl text-white font-black text-sm shadow-xl transition flex items-center justify-center gap-3 disabled:opacity-50 ${
           paymentMethod === 'wave'
-            ? 'bg-sky-600 hover:bg-sky-700 shadow-sky-600/30'
-            : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/30'
+            ? 'bg-sky-500 hover:bg-sky-600 shadow-sky-500/30 ring-2 ring-sky-400/20'
+            : 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/30 ring-2 ring-amber-400/20'
         }`}
       >
         {isRedirecting ? (
@@ -530,8 +591,12 @@ export function InscriptionForm() {
           </>
         ) : (
           <>
-            <Lock className="w-4 h-4" />
-            Payer 1 050 FCFA directement via {paymentMethod === 'wave' ? 'Wave' : 'Orange Money'}
+            <img
+              src={paymentMethod === 'wave' ? '/icons/wave.png' : '/icons/orange-money.png'}
+              alt={paymentMethod === 'wave' ? 'Wave' : 'Orange Money'}
+              className="w-6 h-6 object-contain rounded-md bg-white p-0.5 shadow-sm shrink-0"
+            />
+            <span>Payer 1 050 FCFA avec {paymentMethod === 'wave' ? 'Wave Sénégal' : 'Orange Money'}</span>
           </>
         )}
       </button>

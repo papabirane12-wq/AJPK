@@ -35,19 +35,16 @@ export default function HomePage() {
     const localMembers = getMembers();
     setMemberCount(localMembers.length);
 
-    // 2. Si Supabase est connecté, récupérer le nombre de membres validés/actifs en base
+    // 2. Récupérer le nombre de membres validés/actifs depuis l'API centrale
     async function fetchDatabaseCounts() {
-      if (!supabase) return;
       try {
-        const { count, error } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
-        
-        if (!error && typeof count === 'number' && count > 0) {
-          setMemberCount(count);
+        const res = await fetch('/api/members');
+        const data = await res.json();
+        if (data.success && typeof data.count === 'number' && data.count > 0) {
+          setMemberCount(data.count);
         }
       } catch (e) {
-        console.error('Erreur lecture compteurs Supabase:', e);
+        console.error('Erreur lecture compteurs membres:', e);
       }
     }
 
