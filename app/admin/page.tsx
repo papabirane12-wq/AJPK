@@ -7,10 +7,13 @@ import {
   getOpportunities, 
   getProjects, 
   getPartners, 
-  getCotisations 
+  getCotisations,
+  getCotisationsSummary 
 } from '@/lib/data/store';
 import { StatCard } from '@/components/ui/StatCard';
-import { Users, Calendar, BookOpen, Briefcase, Rocket, Handshake, DollarSign, ShieldCheck } from 'lucide-react';
+import { formatFCFA } from '@/lib/utils/formatters';
+import { Users, Calendar, BookOpen, Briefcase, Rocket, Handshake, DollarSign, ShieldCheck, Wallet, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { 
   AreaChart, 
   Area, 
@@ -33,7 +36,9 @@ export default function AdminOverviewPage() {
   const opps = getOpportunities();
   const projects = getProjects();
   const partners = getPartners();
-  const cots = getCotisations();
+  const cotsSummary = getCotisationsSummary();
+  const cots = cotsSummary.cotisations;
+  const totalCotisationsSum = cotsSummary.totalAmount;
 
   // Chart data
   const memberGrowthData = [
@@ -83,25 +88,26 @@ export default function AdminOverviewPage() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard
-          title="Total Membres Inscrit"
+          title="Total Membres"
           value={members.length}
-          subtitle="+14% ce mois-ci"
-          trend="+14%"
+          subtitle="Adhérents officiels"
+          trend="+100%"
           trendUp={true}
           icon={<Users className="w-6 h-6" />}
         />
+        
         <StatCard
-          title="Événements Organisés"
+          title="Événements"
           value={events.length}
-          subtitle="439 participants cumulés"
+          subtitle="439 participants"
           trend="+25%"
           trendUp={true}
           icon={<Calendar className="w-6 h-6" />}
         />
         <StatCard
-          title="Formations & Attestations"
+          title="Formations"
           value={formations.length}
           subtitle="88 apprenants certifiés"
           trend="+18%"
@@ -174,24 +180,66 @@ export default function AdminOverviewPage() {
 
       </div>
 
-      {/* Cotisations Bar Chart */}
-      <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-white">Collecte des Cotisations Membres (FCFA)</h3>
-          <span className="text-xs text-amber-400 font-bold">Total : 350 000 FCFA / mois</span>
+      {/* Cotisations Section based strictly on valid inscriptions and contributions */}
+      <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-extrabold text-white">Collecte Réelle des Cotisations & Adhésions</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Calcul basé strictement sur les inscriptions validées (1 050 FCFA par adhésion).</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-mono font-extrabold text-emerald-400 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              Total Encaissé : {formatFCFA(totalCotisationsSum)}
+            </span>
+            <Link
+              href="/admin/cotisations"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition flex items-center gap-1.5"
+            >
+              Gérer les Cotisations <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+            </Link>
+          </div>
         </div>
 
-        <div className="h-64 w-full pt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={cotisationsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="month" stroke="#64748b" />
-              <YAxis stroke="#64748b" />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }} />
-              <Bar dataKey="collecte" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
+            <p className="text-xs text-slate-400 font-semibold">Frais d'Adhésions (Inscriptions)</p>
+            <p className="text-xl font-black text-white font-mono mt-1">{formatFCFA(cotsSummary.totalAdhesionAmount)}</p>
+            <p className="text-[10px] text-emerald-400 mt-1">{cotsSummary.adhesionCount} adhérents inscrits (× 1 050 FCFA)</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
+            <p className="text-xs text-slate-400 font-semibold">Cotisations Périodiques / Autres</p>
+            <p className="text-xl font-black text-white font-mono mt-1">{formatFCFA(Math.max(0, totalCotisationsSum - cotsSummary.totalAdhesionAmount))}</p>
+            <p className="text-[10px] text-slate-400 mt-1">{cotsSummary.totalCount - cotsSummary.adhesionCount} versement(s)</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
+            <p className="text-xs text-slate-400 font-semibold">Taux de Règlements Confirmés</p>
+            <p className="text-xl font-black text-emerald-400 font-mono mt-1">100%</p>
+            <p className="text-[10px] text-slate-400 mt-1">Canaux Wave & Orange Money</p>
+          </div>
         </div>
+
+        {cots.length > 0 && (
+          <div className="h-60 w-full pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={cots.map((c) => ({
+                nom: c.member_name ? c.member_name.split(' ')[0] : c.member_number,
+                montant: c.amount_fcfa,
+                motif: c.period
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="nom" stroke="#64748b" />
+                <YAxis stroke="#64748b" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                  formatter={(val: any) => [formatFCFA(Number(val)), 'Montant Encaissé']} 
+                />
+                <Bar dataKey="montant" fill="#10b981" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
     </div>

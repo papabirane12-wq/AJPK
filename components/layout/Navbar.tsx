@@ -102,11 +102,17 @@ export function Navbar() {
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                 >
-                  <img
-                    src={user.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400'}
-                    alt={`${user.first_name}`}
-                    className="w-8 h-8 rounded-xl object-cover ring-2 ring-brand-500"
-                  />
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={`${user.first_name}`}
+                      className="w-8 h-8 rounded-xl object-cover ring-2 ring-brand-500"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-500 text-white font-extrabold text-xs flex items-center justify-center ring-2 ring-brand-500">
+                      {user.first_name?.[0] || 'A'}
+                    </div>
+                  )}
                   <div className="text-left text-xs">
                     <p className="font-bold text-slate-900 dark:text-white leading-tight">
                       {user.first_name} {user.last_name}

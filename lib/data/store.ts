@@ -64,14 +64,21 @@ function setItem<T>(key: string, value: T): void {
   }
 }
 
+const SIMULATED_IDS = new Set(['usr-1', 'usr-2', 'usr-3', 'usr-4', 'usr-5', 'usr-6', 'usr-7', 'usr-8', 'usr-9', 'usr-10']);
+
 // Initial state getters (null par défaut : visiteur non connecté)
 export function getCurrentUser(): Profile | null {
   const user = getItem<Profile | null>(STORAGE_KEYS.CURRENT_USER, null);
-  if (user && (user.member_number === 'AJPK-00011' || (user.first_name === 'Ibrahima' && user.last_name === 'Samb'))) {
-    user.profession = 'Développeur web';
-    user.role = 'super_admin';
-    user.member_number = 'AJPK-00011';
-    user.address = 'Kelle, Sénégal';
+  if (user) {
+    if (user.avatar_url && (user.avatar_url.includes('unsplash') || user.avatar_url.includes('images.unsplash.com'))) {
+      user.avatar_url = '';
+    }
+    if (user.member_number === 'AJPK-00011' || (user.first_name === 'Ibrahima' && user.last_name === 'Samb')) {
+      user.profession = 'Développeur web';
+      user.role = 'super_admin';
+      user.member_number = 'AJPK-00011';
+      user.address = 'Kelle, Sénégal';
+    }
     if (typeof window !== 'undefined') {
       setItem(STORAGE_KEYS.CURRENT_USER, user);
     }
@@ -82,6 +89,9 @@ export function getCurrentUser(): Profile | null {
 export function setCurrentUser(user: Profile | null): void {
   if (typeof window === 'undefined') return;
   if (user) {
+    if (user.avatar_url && (user.avatar_url.includes('unsplash') || user.avatar_url.includes('images.unsplash.com'))) {
+      user.avatar_url = '';
+    }
     if (user.member_number === 'AJPK-00011' || (user.first_name === 'Ibrahima' && user.last_name === 'Samb')) {
       user.profession = 'Développeur web';
       user.role = 'super_admin';
@@ -95,7 +105,10 @@ export function setCurrentUser(user: Profile | null): void {
 }
 
 export function getMembers(): Profile[] {
-  const members = getItem<Profile[]>(STORAGE_KEYS.MEMBERS, mockMembers);
+  const rawMembers = getItem<Profile[]>(STORAGE_KEYS.MEMBERS, mockMembers);
+  // Supprimer définitivement les anciens membres simulés stockés en cache
+  const members = rawMembers.filter(m => !SIMULATED_IDS.has(m.id));
+
   // Toujours synchroniser les informations officielles de Ibrahima Samb
   const ibrahimaIndex = members.findIndex(m => m.member_number === 'AJPK-00011' || (m.first_name === 'Ibrahima' && m.last_name === 'Samb'));
   if (ibrahimaIndex !== -1) {
@@ -107,11 +120,24 @@ export function getMembers(): Profile[] {
       profession: 'Développeur web',
       role: 'super_admin',
       address: 'Kelle, Sénégal',
+      avatar_url: members[ibrahimaIndex].avatar_url?.includes('unsplash') ? '' : (members[ibrahimaIndex].avatar_url || ''),
     };
   } else {
     const adminSamb = mockMembers.find(m => m.member_number === 'AJPK-00011');
     if (adminSamb) members.push(adminSamb);
   }
+
+  // Nettoyer toute photo de membre simulée (Unsplash)
+  for (const m of members) {
+    if (m.avatar_url && (m.avatar_url.includes('unsplash') || m.avatar_url.includes('images.unsplash.com'))) {
+      m.avatar_url = '';
+    }
+  }
+
+  if (typeof window !== 'undefined' && members.length !== rawMembers.length) {
+    setItem(STORAGE_KEYS.MEMBERS, members);
+  }
+
   return members;
 }
 
@@ -141,7 +167,7 @@ export function addMember(newMember: Partial<Profile>): Profile {
     address: newMember.address || 'Kelle',
     profession: newMember.profession || 'Membre AJPK',
     education_level: newMember.education_level || 'Baccalauréat',
-    avatar_url: newMember.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+    avatar_url: newMember.avatar_url || '',
     bio: newMember.bio || 'Jeune engagé pour le développement de Kelle.',
     role: 'member',
     created_at: new Date().toISOString(),
@@ -153,22 +179,47 @@ export function addMember(newMember: Partial<Profile>): Profile {
   const updated = [created, ...members];
   setItem(STORAGE_KEYS.MEMBERS, updated);
 
-  // Enregistrer le reçu de paiement de l'adhésion (1 050 FCFA)
+  // Enregistrer le reçu de paiement de l'adhésion officielle (1 050 FCFA)
   const cots = getCotisations();
   const adhesionCotisation: Cotisation = {
-    id: `cot-${Date.now()}`,
+    id: `cot-adhesion-${created.member_number}`,
     member_id: created.id,
-    member_name: `${created.first_name} ${created.last_name}`,
+    member_name: `${created.first_name} ${created.last_name}`.trim(),
     member_number: created.member_number,
     amount_fcfa: 1050,
-    period: 'Frais d’Adhésion & Carte',
+    period: 'Frais d’Adhésion & Carte Membre',
     status: 'paye',
     payment_date: new Date().toISOString().split('T')[0],
     method: 'Wave / Orange Money'
   };
-  setItem(STORAGE_KEYS.COTISATIONS, [adhesionCotisation, ...cots]);
+  const filteredCots = cots.filter(c => c.member_number !== created.member_number);
+  setItem(STORAGE_KEYS.COTISATIONS, [adhesionCotisation, ...filteredCots]);
 
   return created;
+}
+
+export function updateMember(memberIdOrNumber: string, updates: Partial<Profile>): Profile | null {
+  const members = getMembers();
+  const index = members.findIndex(m => m.id === memberIdOrNumber || m.member_number === memberIdOrNumber);
+  if (index === -1) return null;
+
+  members[index] = { ...members[index], ...updates };
+  setItem(STORAGE_KEYS.MEMBERS, members);
+
+  // Synchroniser current user si identique
+  const currentUser = getItem<Profile | null>(STORAGE_KEYS.CURRENT_USER, null);
+  if (currentUser && (currentUser.id === memberIdOrNumber || currentUser.member_number === memberIdOrNumber)) {
+    const updatedUser = { ...currentUser, ...updates };
+    setItem(STORAGE_KEYS.CURRENT_USER, updatedUser);
+  }
+
+  return members[index];
+}
+
+export function updateCurrentUserAvatar(avatarUrl: string): Profile | null {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return null;
+  return updateMember(currentUser.id, { avatar_url: avatarUrl });
 }
 
 export function getEvents(): Event[] {
@@ -336,8 +387,134 @@ export function addArticle(art: Partial<Article>): Article {
   return created;
 }
 
+const SIMULATED_COT_IDS = new Set(['cot-1', 'cot-2', 'cot-3', 'cot-4', 'cot-5']);
+
 export function getCotisations(): Cotisation[] {
-  return getItem<Cotisation[]>(STORAGE_KEYS.COTISATIONS, mockCotisations);
+  const rawCots = getItem<Cotisation[]>(STORAGE_KEYS.COTISATIONS, []);
+  const members = getMembers();
+  const validMemberMap = new Map(members.map(m => [m.member_number, m]));
+
+  // 1. Filtrer toutes les cotisations simulées (IDs fictifs, membres fictifs, adhérents inexistants)
+  const nonSimulated = rawCots.filter(c => 
+    c &&
+    !SIMULATED_COT_IDS.has(c.id) && 
+    (!c.member_id || !SIMULATED_IDS.has(c.member_id)) &&
+    c.member_number &&
+    validMemberMap.has(c.member_number)
+  );
+
+  // 2. Harmoniser les cotisations valides et garantir l'adhésion officielle (1 050 FCFA) pour chaque membre inscrit
+  const validCots: Cotisation[] = [];
+  const membersWithAdhesion = new Set<string>();
+
+  for (const cot of nonSimulated) {
+    const member = validMemberMap.get(cot.member_number);
+    if (!member) continue;
+
+    const isAdhesion = 
+      cot.id.startsWith('cot-adhesion-') || 
+      cot.period?.toLowerCase().includes('adhésion') || 
+      cot.period?.toLowerCase().includes('adhesion') || 
+      cot.amount_fcfa === 1050;
+
+    if (isAdhesion) {
+      if (membersWithAdhesion.has(cot.member_number)) {
+        continue; // Éviter tout doublon d'adhésion pour un même membre inscrit
+      }
+      membersWithAdhesion.add(cot.member_number);
+    }
+
+    validCots.push({
+      ...cot,
+      member_name: `${member.first_name} ${member.last_name}`.trim(),
+      member_id: member.id,
+      amount_fcfa: Number(cot.amount_fcfa) || 1050,
+      status: cot.status || 'paye'
+    });
+  }
+
+  // 3. S'assurer que chaque membre inscrit possède sa cotisation d'adhésion officielle de 1 050 FCFA
+  for (const m of members) {
+    if (!membersWithAdhesion.has(m.member_number)) {
+      validCots.unshift({
+        id: `cot-adhesion-${m.member_number}`,
+        member_id: m.id,
+        member_name: `${m.first_name} ${m.last_name}`.trim(),
+        member_number: m.member_number,
+        amount_fcfa: 1050,
+        period: 'Frais d’Adhésion & Carte Membre',
+        status: 'paye',
+        payment_date: m.created_at ? m.created_at.split('T')[0] : '2026-10-10',
+        method: 'Wave / Orange Money',
+      });
+      membersWithAdhesion.add(m.member_number);
+    }
+  }
+
+  // 4. Sauvegarder dans localStorage si la liste a été mise à jour ou nettoyée
+  if (typeof window !== 'undefined') {
+    setItem(STORAGE_KEYS.COTISATIONS, validCots);
+  }
+
+  return validCots;
+}
+
+export function getCotisationsSummary() {
+  const cots = getCotisations();
+  const totalAmount = cots.reduce((sum, c) => sum + (c.status === 'paye' ? (Number(c.amount_fcfa) || 0) : 0), 0);
+  const pendingAmount = cots.reduce((sum, c) => sum + (c.status === 'en_attente' ? (Number(c.amount_fcfa) || 0) : 0), 0);
+  const totalPaidCount = cots.filter(c => c.status === 'paye').length;
+  const totalPendingCount = cots.filter(c => c.status === 'en_attente').length;
+  
+  const adhesionCots = cots.filter(c => 
+    c.id.startsWith('cot-adhesion-') || 
+    c.period?.toLowerCase().includes('adhésion') || 
+    c.period?.toLowerCase().includes('adhesion') || 
+    c.amount_fcfa === 1050
+  );
+  const totalAdhesionAmount = adhesionCots.reduce((sum, c) => sum + (c.status === 'paye' ? (Number(c.amount_fcfa) || 0) : 0), 0);
+
+  return {
+    totalAmount,
+    pendingAmount,
+    totalCount: cots.length,
+    totalPaidCount,
+    totalPendingCount,
+    adhesionCount: adhesionCots.length,
+    totalAdhesionAmount,
+    cotisations: cots
+  };
+}
+
+export function resetCotisationsToInscriptions(): Cotisation[] {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(STORAGE_KEYS.COTISATIONS);
+  }
+  return getCotisations();
+}
+
+export function addCotisation(cot: Partial<Cotisation>): Cotisation {
+  const cots = getCotisations();
+  const created: Cotisation = {
+    id: `cot-${Date.now()}`,
+    member_id: cot.member_id || '',
+    member_name: cot.member_name || 'Membre AJPK',
+    member_number: cot.member_number || 'AJPK-00000',
+    amount_fcfa: cot.amount_fcfa || 1050,
+    period: cot.period || 'Cotisation Mensuelle',
+    status: cot.status || 'paye',
+    payment_date: cot.payment_date || new Date().toISOString().split('T')[0],
+    method: cot.method || 'Wave Sénégal',
+  };
+  const updated = [created, ...cots];
+  setItem(STORAGE_KEYS.COTISATIONS, updated);
+  return created;
+}
+
+export function deleteCotisation(cotisationId: string): void {
+  const cots = getCotisations();
+  const updated = cots.filter(c => c.id !== cotisationId);
+  setItem(STORAGE_KEYS.COTISATIONS, updated);
 }
 
 export function markCotisationPaid(cotisationId: string, method = 'Wave Sénégal'): void {
@@ -351,8 +528,10 @@ export function markCotisationPaid(cotisationId: string, method = 'Wave Sénéga
   setItem(STORAGE_KEYS.COTISATIONS, updated);
 }
 
+const SIMULATED_CERT_IDS = new Set(['cert-1', 'cert-2']);
 export function getCertificates(): Certificate[] {
-  return getItem<Certificate[]>(STORAGE_KEYS.CERTIFICATES, mockCertificates);
+  const certs = getItem<Certificate[]>(STORAGE_KEYS.CERTIFICATES, mockCertificates);
+  return certs.filter(c => !SIMULATED_CERT_IDS.has(c.id));
 }
 
 export function generateCertificate(member: Profile, formation: Formation): Certificate {

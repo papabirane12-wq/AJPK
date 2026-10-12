@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Profile } from '@/types';
 import { QRCodeView } from '@/components/ui/QRCodeView';
 import { formatDateFr } from '@/lib/utils/formatters';
@@ -11,8 +12,9 @@ interface MemberCardDigitalProps {
 }
 
 export function MemberCardDigital({ member, showActions = true }: MemberCardDigitalProps) {
+  const [imgError, setImgError] = useState(false);
   const verificationUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/verification/${member.member_number}` 
+    ? `${window.location.origin.replace(/^http:\/\//i, 'https://')}/verification/${member.member_number}` 
     : `https://ajpk.sn/verification/${member.member_number}`;
 
   return (
@@ -35,8 +37,8 @@ export function MemberCardDigital({ member, showActions = true }: MemberCardDigi
               />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm tracking-wide text-white uppercase">Carte Officielle de Membre</h3>
-              <p className="text-[10px] text-gold-400 font-semibold tracking-wider">Association Jeunesse Polyvalente de Kelle</p>
+              <h3 className="font-extrabold text-sm tracking-wide text-white uppercase">Carte de Membre</h3>
+              <p className="text-[10px] text-gold-400 font-semibold tracking-wider">Association de la Jeunesse Polyvalente de Kelle</p>
             </div>
           </div>
           <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
@@ -49,12 +51,22 @@ export function MemberCardDigital({ member, showActions = true }: MemberCardDigi
           
           {/* Member Photo */}
           <div className="col-span-1">
-            <div className="w-24 h-28 rounded-2xl overflow-hidden ring-2 ring-emerald-500/50 shadow-md bg-slate-800">
-              <img
-                src={member.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400'}
-                alt={`${member.first_name} ${member.last_name}`}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-24 h-28 rounded-2xl overflow-hidden ring-2 ring-emerald-500/50 shadow-md bg-slate-800 flex items-center justify-center">
+              {member.avatar_url && !imgError ? (
+                <img
+                  src={member.avatar_url}
+                  alt={`${member.first_name} ${member.last_name}`}
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-400 p-2 text-center">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-sm mb-1">
+                    {member.first_name?.[0] || ''}{member.last_name?.[0] || ''}
+                  </div>
+                  <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400">Photo AJPK</span>
+                </div>
+              )}
             </div>
           </div>
 

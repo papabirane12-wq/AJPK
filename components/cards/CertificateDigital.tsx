@@ -11,7 +11,7 @@ interface CertificateDigitalProps {
 
 export function CertificateDigital({ certificate }: CertificateDigitalProps) {
   const verifyUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/verification/cert-${certificate.certificate_number}`
+    ? `${window.location.origin.replace(/^http:\/\//i, 'https://')}/verification/cert-${certificate.certificate_number}`
     : `https://ajpk.sn/verification/cert-${certificate.certificate_number}`;
 
   return (

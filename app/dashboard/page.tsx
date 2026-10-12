@@ -117,20 +117,26 @@ export default function MemberDashboardOverviewPage() {
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Statut des Cotisations Membre</h3>
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                1 000 FCFA / mois
+                Adhésion & Carte Active
               </span>
             </div>
 
             <div className="space-y-2">
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl flex items-center justify-between text-xs">
-                <div>
-                  <p className="font-bold text-slate-900 dark:text-white">Cotisation Octobre 2026</p>
-                  <p className="text-[10px] text-slate-400">Paiement via Wave Sénégal</p>
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                  Payé ✓
-                </span>
-              </div>
+              {cots
+                .filter(c => c.member_number === user.member_number || c.member_id === user.id)
+                .map((cot) => (
+                  <div key={cot.id} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl flex items-center justify-between text-xs">
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-white">{cot.period}</p>
+                      <p className="text-[10px] text-slate-400">
+                        {cot.method || 'Wave / Orange Money'} • {cot.amount_fcfa} FCFA
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      {cot.status === 'paye' ? 'Validé ✓' : cot.status}
+                    </span>
+                  </div>
+                ))}
             </div>
           </div>
 

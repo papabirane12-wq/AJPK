@@ -64,7 +64,13 @@ export default function AdminMembresPage() {
               {filtered.map((member) => (
                 <tr key={member.id} className="hover:bg-slate-800/50 transition">
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <img src={member.avatar_url} alt={member.first_name} className="w-9 h-9 rounded-xl object-cover ring-2 ring-emerald-500/40" />
+                    {member.avatar_url ? (
+                      <img src={member.avatar_url} alt={member.first_name} className="w-9 h-9 rounded-xl object-cover ring-2 ring-emerald-500/40" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-xl bg-slate-800 text-emerald-400 font-bold text-xs flex items-center justify-center ring-2 ring-emerald-500/40">
+                        {member.first_name?.[0] || ''}{member.last_name?.[0] || ''}
+                      </div>
+                    )}
                     <div>
                       <p className="font-extrabold text-white">{member.first_name} {member.last_name}</p>
                       <p className="text-[10px] text-slate-500">{formatDateFr(member.created_at)}</p>

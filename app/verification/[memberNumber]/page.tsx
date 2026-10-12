@@ -47,11 +47,17 @@ export default function VerificationPage() {
             {/* Public details card */}
             <div className="p-6 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-left space-y-3">
               <div className="flex items-center gap-4">
-                <img
-                  src={member.avatar_url}
-                  alt={member.first_name}
-                  className="w-16 h-16 rounded-xl object-cover ring-2 ring-emerald-500"
-                />
+                {member.avatar_url ? (
+                  <img
+                    src={member.avatar_url}
+                    alt={member.first_name}
+                    className="w-16 h-16 rounded-xl object-cover ring-2 ring-emerald-500"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl bg-slate-800 text-emerald-400 font-bold text-lg flex items-center justify-center ring-2 ring-emerald-500">
+                    {member.first_name?.[0] || ''}{member.last_name?.[0] || ''}
+                  </div>
+                )}
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
                     {member.first_name} {member.last_name}

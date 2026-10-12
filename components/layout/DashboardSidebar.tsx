@@ -41,11 +41,17 @@ export function DashboardSidebar() {
       {/* User profile widget */}
       <div className="p-4 rounded-2xl bg-gradient-to-br from-brand-900 to-slate-900 text-white mb-6 shadow-md">
         <div className="flex items-center gap-3">
-          <img
-            src={user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400'}
-            alt={user ? `${user.first_name}` : 'Visiteur'}
-            className="w-10 h-10 rounded-xl object-cover ring-2 ring-emerald-400"
-          />
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt={user ? `${user.first_name}` : 'Visiteur'}
+              className="w-10 h-10 rounded-xl object-cover ring-2 ring-emerald-400"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-500 text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-emerald-400">
+              {user?.first_name?.[0] || 'A'}
+            </div>
+          )}
           <div className="overflow-hidden">
             <h4 className="text-sm font-extrabold truncate">{user ? `${user.first_name} ${user.last_name}` : 'Non connecté'}</h4>
             <p className="text-[10px] text-amber-400 font-mono font-bold">{user?.member_number || 'Invité'}</p>

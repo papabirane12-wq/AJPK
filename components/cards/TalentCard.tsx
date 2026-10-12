@@ -12,12 +12,18 @@ export function TalentCard({ member }: TalentCardProps) {
     <div className="bg-white dark:bg-slate-850 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4">
       
       <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 ring-2 ring-emerald-500/40 shrink-0">
-          <img
-            src={member.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400'}
-            alt={`${member.first_name} ${member.last_name}`}
-            className="w-full h-full object-cover"
-          />
+        <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 ring-2 ring-emerald-500/40 shrink-0 flex items-center justify-center">
+          {member.avatar_url ? (
+            <img
+              src={member.avatar_url}
+              alt={`${member.first_name} ${member.last_name}`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-tr from-brand-600 to-emerald-500 text-white font-extrabold text-lg flex items-center justify-center">
+              {member.first_name?.[0] || ''}{member.last_name?.[0] || ''}
+            </div>
+          )}
         </div>
 
         <div>
