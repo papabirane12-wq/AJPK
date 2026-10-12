@@ -95,7 +95,7 @@ export default function HomePage() {
               <p className="text-3xl sm:text-4xl font-black text-brand-600 dark:text-emerald-400">
                 {memberCount}
               </p>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Membres Validés</p>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Membres Actifs</p>
             </div>
             <div className="p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm text-center">
               <p className="text-3xl sm:text-4xl font-black text-amber-500">

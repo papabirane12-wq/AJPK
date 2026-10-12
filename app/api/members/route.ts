@@ -5,13 +5,139 @@ import { mockMembers } from '@/lib/data/mockData';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://yfhcfplybkozeloaezzj.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const UNITECH_API_URL = 'https://api.unitech.sn/api.php';
+const UNITECH_API_KEY = process.env.UNITECH_PAY_API_KEY || '4c53ad12e1e4bcaa5d65576fadfef7618dfa7fd495124f7d8093968d5d0e505c';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+function avatarPreviewOrEmpty(url?: string): string {
+  if (!url) return '';
+  if (url.startsWith('data:image/') || url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return '';
+}
+
+// Fonction pour synchroniser en direct les paiements Unitech Pay avec Supabase
+async function syncUnitechPaymentsWithSupabase() {
   try {
+    const res = await fetch(`${UNITECH_API_URL}?action=transactions`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${UNITECH_API_KEY}` },
+      cache: 'no-store',
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) return;
+
+    const completed = (data.data?.transactions || []).filter(
+      (t: any) => t.status === 'completed' && parseFloat(t.amount) === 1050
+    );
+
+    // Trier par date croissante (du plus ancien au plus récent) pour attribuer l'ordre chronologique
+    completed.sort(
+      (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    // Récupérer les messages existants
+    const { data: existingRows } = await supabase
+      .from('contact_messages')
+      .select('subject, message')
+      .like('subject', 'AJPK_MEMBER:%');
+
+    const knownRefs = new Set<string>();
+    const knownPhones = new Set<string>();
+    const existingNums: number[] = [11];
+
+    for (const row of existingRows || []) {
+      const match = row.subject?.match(/AJPK-(\d+)/i);
+      if (match) existingNums.push(parseInt(match[1], 10));
+
+      try {
+        const m = JSON.parse(row.message);
+        if (m.payment_ref) knownRefs.add(m.payment_ref);
+        if (m.phone) knownPhones.add(m.phone.replace(/[^0-9]/g, ''));
+      } catch {
+        // Ignorer
+      }
+    }
+
+    let nextNumber = Math.max(...existingNums.filter((n) => !isNaN(n) && n > 0)) + 1;
+
+    for (const t of completed) {
+      const cleanPhone = (t.customer_number || '').replace(/[^0-9]/g, '');
+
+      // Déjà enregistré
+      if (knownRefs.has(t.reference) || (cleanPhone && knownPhones.has(cleanPhone))) {
+        continue;
+      }
+
+      let fullName = 'Membre Adhérent';
+      try {
+        const meta = typeof t.metadata === 'string' ? JSON.parse(t.metadata) : t.metadata;
+        if (meta?.description) {
+          fullName = meta.description.replace(/^Adhésion\s+AJPK\s*-\s*/i, '').trim();
+        }
+      } catch {
+        // Ignorer
+      }
+
+      const parts = fullName.split(/\s+/);
+      const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0];
+      const lastName = parts.length > 1 ? parts[parts.length - 1] : 'AJPK';
+      const memberNumber = `AJPK-${String(nextNumber).padStart(5, '0')}`;
+      nextNumber++;
+
+      const memberObj: Profile & { payment_ref?: string; payment_method?: string; payment_amount?: number } = {
+        id: `usr-unitech-${t.id}`,
+        first_name: firstName,
+        last_name: lastName,
+        email: `${firstName.toLowerCase().replace(/[^a-z0-9]/g, '')}.${lastName.toLowerCase().replace(/[^a-z0-9]/g, '') || cleanPhone}@ajpk.sn`,
+        phone: cleanPhone.startsWith('221') ? `+${cleanPhone}` : `+221 ${cleanPhone}`,
+        member_number: memberNumber,
+        address: 'Commune de Kelle',
+        profession: 'Membre AJPK',
+        date_of_birth: '2000-01-01',
+        sex: 'M',
+        education_level: 'Baccalauréat',
+        avatar_url: '',
+        bio: 'Membre actif engagé pour le développement de Kelle.',
+        role: 'member',
+        status: 'actif',
+        created_at: t.created_at ? new Date(t.created_at).toISOString() : new Date().toISOString(),
+        skills: [],
+        interest_domains: [],
+        payment_ref: t.reference,
+        payment_method: t.method === 'wave' ? 'Wave Sénégal' : 'Orange Money',
+        payment_amount: 1050,
+      };
+
+      await supabase.from('contact_messages').insert({
+        name: fullName,
+        email: memberObj.email,
+        subject: `AJPK_MEMBER:${memberNumber}`,
+        message: JSON.stringify(memberObj),
+      });
+
+      knownRefs.add(t.reference);
+      if (cleanPhone) knownPhones.add(cleanPhone);
+    }
+  } catch (err) {
+    console.error('Erreur synchronisation Unitech Pay:', err);
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const syncParam = searchParams.get('sync');
+
+    // Toujours vérifier et synchroniser avec Unitech Pay pour ne rater aucun paiement validé
+    if (syncParam !== 'false') {
+      await syncUnitechPaymentsWithSupabase();
+    }
+
     const allMembersMap = new Map<string, Profile>();
 
     // 1. Ajouter les membres statiques de base (admin officiel Ibrahima Samb AJPK-00011)
@@ -24,6 +150,7 @@ export async function GET() {
       const { data: dbProfiles } = await supabase.from('profiles').select('*');
       if (dbProfiles && Array.isArray(dbProfiles)) {
         for (const p of dbProfiles) {
+          if (!p.member_number || p.member_number === 'AJPK-99998') continue;
           const profileObj: Profile = {
             id: p.id || `usr-${p.member_number}`,
             email: p.email,
@@ -135,7 +262,7 @@ export async function POST(request: Request) {
     }
 
     // Calculer le prochain numéro STRICTEMENT UNIQUE
-    const maxNumber = Math.max(...existingNumbers.filter(n => !isNaN(n) && n > 0));
+    const maxNumber = Math.max(...existingNumbers.filter((n) => !isNaN(n) && n > 0));
     const nextNumber = maxNumber + 1;
     const member_number = `AJPK-${String(nextNumber).padStart(5, '0')}`;
 
@@ -158,38 +285,31 @@ export async function POST(request: Request) {
       bio: 'Membre actif engagé pour le développement de Kelle.',
       role: role as Profile['role'],
       created_at: new Date().toISOString(),
-      skills: ['Engagement citoyen', 'Solidarité'],
-      interest_domains: ['Développement local', 'Jeunesse'],
+      skills: [],
+      interest_domains: [],
       status: 'actif',
     };
 
-    // 2. Persister de manière centrale dans Supabase
+    // Enregistrer de manière centralisée dans `contact_messages`
     try {
-      await supabase.from('contact_messages').insert([
-        {
-          name: `${newMember.first_name} ${newMember.last_name}`,
-          email: newMember.email,
-          subject: `AJPK_MEMBER:${member_number}`,
-          message: JSON.stringify(newMember),
-        },
-      ]);
-    } catch (dbErr) {
-      console.error('Erreur insertion Supabase contact_messages:', dbErr);
+      await supabase.from('contact_messages').insert({
+        name: `${newMember.first_name} ${newMember.last_name}`,
+        email: newMember.email,
+        subject: `AJPK_MEMBER:${newMember.member_number}`,
+        message: JSON.stringify(newMember),
+      });
+    } catch (syncErr) {
+      console.error('Erreur enregistrement contact_messages Supabase:', syncErr);
     }
 
     return NextResponse.json({
       success: true,
       member: newMember,
-      message: `Membre ${member_number} enregistré avec succès dans la base centrale.`,
+      message: 'Membre enregistré avec succès avec numéro unique.',
     });
-  } catch (error: unknown) {
-    console.error('Erreur POST /api/members:', error);
-    const errMessage = error instanceof Error ? error.message : 'Erreur interne';
-    return NextResponse.json({ success: false, message: errMessage }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Erreur serveur';
+    console.error('Erreur POST /api/members:', err);
+    return NextResponse.json({ success: false, message: msg }, { status: 500 });
   }
-}
-
-function avatarPreviewOrEmpty(url?: string): string {
-  if (!url) return '';
-  return url;
 }

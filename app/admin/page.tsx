@@ -217,8 +217,8 @@ export default function AdminOverviewPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
             <p className="text-xs text-slate-400 font-semibold">Frais d'Adhésions (Inscriptions)</p>
-            <p className="text-xl font-black text-white font-mono mt-1">{formatFCFA(cotsSummary.totalAdhesionAmount)}</p>
-            <p className="text-[10px] text-emerald-400 mt-1">{cotsSummary.adhesionCount} adhérents inscrits (× 1 050 FCFA)</p>
+            <p className="text-xl font-black text-white font-mono mt-1">{formatFCFA(members.length * 1050)}</p>
+            <p className="text-[10px] text-emerald-400 mt-1">{members.length} adhérents inscrits (× 1 050 FCFA)</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60">
