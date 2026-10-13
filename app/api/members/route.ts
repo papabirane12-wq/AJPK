@@ -21,28 +21,32 @@ function avatarPreviewOrEmpty(url?: string): string {
 
 // 1. Dictionnaire IMMUABLE des numéros de membres officiels verrouillés
 // Ces numéros sont DÉFINITIFS, GRAVÉS DANS LE MARBRE et ne changeront JAMAIS en production.
+// AUCUN membre validé n'est supprimé lors de l'arrivée d'un nouveau membre.
 const LOCKED_MEMBER_REGISTRY: Record<string, string> = {
   // Administrateur Officiel
   'ADMIN_OFFICIEL': 'AJPK-00011',
   '770000011': 'AJPK-00011',
 
   // Membres fondateurs et adhérents validés
-  'wave_6accee04c764a_1791815172': 'AJPK-00001', // Papa Mouhamed NDIAYE
-  'wave_6accf1ba6d675_1791816122': 'AJPK-00002', // Mbissane Ndiaye
-  'orange_om_6accf4cac3fb0_1791816906': 'AJPK-00003', // Moustapha NDIAYE
-  'wave_6accfe642a99d_1791819364': 'AJPK-00004', // Aïtou Ndiaye
-  'wave_6accfeb78300b_1791819447': 'AJPK-00005', // Papa birane SAMB
-  'wave_6acd0304299df_1791820548': 'AJPK-00006', // Abdoulaye Faye
-  'wave_6acd032c42a2b_1791820588': 'AJPK-00007', // Ousmane Ba
-  'wave_6acd0778b64bf_1791821688': 'AJPK-00008', // Baye Mbaye Fall
-  'wave_6acd0b7c35cb5_1791822716': 'AJPK-00009', // Papa amadou Faye
-  'wave_6acd2eba5498b_1791831738': 'AJPK-00010', // Marie José Boye
-  'wave_6acd3ac9cb30c_1791834825': 'AJPK-00012', // Alioune NDIAYE
-  'wave_6acd3e1591956_1791835669': 'AJPK-00013', // Issa Ndour
-  'wave_6acd463724578_1791837751': 'AJPK-00014', // Jamal Mouhamed Soumare
-  'wave_6acd4b839cb39_1791839107': 'AJPK-00015', // Daouda Assane Ciss
-  'wave_6acd702549dc8_1791848485': 'AJPK-00016', // Tanor Dieng
-  'wave_6acdfa6311fda_1791883875': 'AJPK-00017', // Cheikhou Niang
+  'wave_6acce4d611ce9_1791812822': 'AJPK-00001', // Banda Niang
+  'wave_6acce9c1c3da1_1791814081': 'AJPK-00002', // ABDOUL KARIM FALL
+  'wave_6accee04c764a_1791815172': 'AJPK-00003', // Papa Mouhamed NDIAYE
+  'wave_6accf1ba6d675_1791816122': 'AJPK-00004', // Mbissane Ndiaye
+  'orange_om_6accf4cac3fb0_1791816906': 'AJPK-00005', // Moustapha NDIAYE
+  'wave_6accfe642a99d_1791819364': 'AJPK-00006', // Aïtou Ndiaye
+  'wave_6accfeb78300b_1791819447': 'AJPK-00007', // Papa birane SAMB
+  'wave_6acd0304299df_1791820548': 'AJPK-00008', // Abdoulaye Faye
+  'wave_6acd032c42a2b_1791820588': 'AJPK-00009', // Ousmane Ba
+  'wave_6acd0778b64bf_1791821688': 'AJPK-00010', // Baye Mbaye Fall
+  'wave_6acd0b7c35cb5_1791822716': 'AJPK-00012', // Papa amadou Faye
+  'wave_6acd2eba5498b_1791831738': 'AJPK-00013', // Marie José Boye
+  'wave_6acd3ac9cb30c_1791834825': 'AJPK-00014', // Alioune NDIAYE
+  'wave_6acd3e1591956_1791835669': 'AJPK-00015', // Issa Ndour
+  'wave_6acd463724578_1791837751': 'AJPK-00016', // Jamal Mouhamed Soumare
+  'wave_6acd4b839cb39_1791839107': 'AJPK-00017', // Daouda Assane Ciss
+  'wave_6acd702549dc8_1791848485': 'AJPK-00018', // Tanor Dieng
+  'wave_6acdfa6311fda_1791883875': 'AJPK-00019', // Cheikhou Niang
+  'wave_6ace06e2747e2_1791887074': 'AJPK-00020', // Abdou Karim Ndiaye
 };
 
 // Profil officiel de l'administrateur Ibrahima Samb
@@ -73,40 +77,43 @@ const adminIbrahimaSamb: Profile & { payment_ref: string; payment_method: string
 
 export async function GET() {
   try {
-    // 1. Interroger l'API officielle Unitech Pay en temps réel
-    const res = await fetch(`${UNITECH_API_URL}?action=transactions`, {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${UNITECH_API_KEY}` },
-      cache: 'no-store',
-    });
+    // 1. Interroger l'API officielle Unitech Pay avec une limite large (limit=500) pour ne JAMAIS perdre d'anciens paiements
+    let completedTransactions: any[] = [];
+    try {
+      const res = await fetch(`${UNITECH_API_URL}?action=transactions&limit=500`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${UNITECH_API_KEY}` },
+        cache: 'no-store',
+      });
 
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      return NextResponse.json({ success: false, message: 'Erreur Unitech Pay' }, { status: 500 });
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.data?.transactions)) {
+        completedTransactions = data.data.transactions.filter(
+          (t: any) => t.status === 'completed' && parseFloat(t.amount) === 1050
+        );
+      }
+    } catch (apiErr) {
+      console.error('Erreur appel Unitech Pay:', apiErr);
     }
-
-    // 2. Filtrer STRICTEMENT les paiements validés (status === 'completed' et montant === 1050)
-    const completedTransactions: any[] = (data.data?.transactions || []).filter(
-      (t: any) => t.status === 'completed' && parseFloat(t.amount) === 1050
-    );
 
     // Trier du plus ancien au plus récent
     completedTransactions.sort(
       (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
 
-    // 3. Récupérer les photos, informations et numéros assignés en base de données Supabase
+    // 2. Récupérer les photos, informations et numéros assignés en base de données Supabase
     const dbMembersMap = new Map<string, { member_number?: string; avatar_url?: string; extra?: any }>();
     const assignedNumbers = new Set<number>();
     assignedNumbers.add(11); // 11 est réservé à Ibrahima Samb
 
-    // Enregistrer d'abord les numéros du registre verrouillé
+    // Enregistrer d'abord tous les numéros du registre verrouillé
     for (const [key, numStr] of Object.entries(LOCKED_MEMBER_REGISTRY)) {
       const match = numStr.match(/AJPK-(\d+)/i);
       if (match) assignedNumbers.add(parseInt(match[1], 10));
       dbMembersMap.set(key, { member_number: numStr });
     }
 
+    // Récupérer les membres stockés dans Supabase contact_messages
     try {
       const { data: messages } = await supabase
         .from('contact_messages')
@@ -154,12 +161,12 @@ export async function GET() {
       console.error('Erreur lecture Supabase:', e);
     }
 
-    // 4. Traiter chaque transaction validée
+    // 3. Traiter chaque transaction validée
     // Si un numéro est déjà assigné, ON LE GARDE À JAMAIS.
     // Si c'est un nouveau membre en production, on lui assigne le prochain numéro disponible et on le sauvegarde en base.
     let nextAvailableNum = Math.max(...Array.from(assignedNumbers).filter((n) => !isNaN(n) && n > 0)) + 1;
 
-    const validatedMembers: Profile[] = [];
+    const validatedMembersMap = new Map<string, Profile>();
 
     for (const t of completedTransactions) {
       const cleanPhone = (t.customer_number || '').replace(/[^0-9]/g, '');
@@ -241,11 +248,11 @@ export async function GET() {
         payment_date: t.created_at,
       };
 
-      validatedMembers.push(memberObj);
+      validatedMembersMap.set(member_number, memberObj);
     }
 
-    // 5. Inclure Ibrahima Samb (l'administrateur super_admin AJPK-00011)
-    const allMembers: Profile[] = [adminIbrahimaSamb, ...validatedMembers];
+    // 4. Inclure Ibrahima Samb (l'administrateur super_admin AJPK-00011)
+    const allMembers: Profile[] = [adminIbrahimaSamb, ...Array.from(validatedMembersMap.values())];
 
     // Tri par numéro d'adhérent décroissant pour afficher les derniers inscrits en premier
     allMembers.sort((a, b) => {

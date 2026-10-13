@@ -20,7 +20,7 @@ export interface UnitechTransactionItem {
 
 export async function GET() {
   try {
-    const response = await fetch(`${UNITECH_API_URL}?action=transactions`, {
+    const response = await fetch(`${UNITECH_API_URL}?action=transactions&limit=500`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${UNITECH_API_KEY}`,
