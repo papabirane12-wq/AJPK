@@ -36,7 +36,7 @@ interface UnitechTx {
 }
 
 export default function AdminMembresPage() {
-  const [members, setMembers] = useState<Profile[]>(() => getMembers());
+  const [members, setMembers] = useState<Profile[]>([]);
   const [transactions, setTransactions] = useState<UnitechTx[]>([]);
   const [activeTab, setActiveTab] = useState<'members' | 'transactions'>('members');
   const [isLoading, setIsLoading] = useState(false);
@@ -50,14 +50,11 @@ export default function AdminMembresPage() {
     setSyncFeedback('');
 
     try {
-      // 1. Charger les membres avec synchronisation Unitech
+      // 1. Charger les membres directement depuis la base de données
       const memRes = await fetch(`/api/members?sync=${triggerSync ? 'true' : 'false'}`);
       const memData = await memRes.json();
       if (memData.success && Array.isArray(memData.members)) {
         setMembers(memData.members);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('ajpk_members', JSON.stringify(memData.members));
-        }
       }
 
       // 2. Charger les transactions Unitech Pay

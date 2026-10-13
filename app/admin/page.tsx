@@ -32,7 +32,7 @@ import {
 } from 'recharts';
 
 export default function AdminOverviewPage() {
-  const [members, setMembers] = useState<Profile[]>(() => getMembers());
+  const [members, setMembers] = useState<Profile[]>([]);
 
   useEffect(() => {
     fetch('/api/members')

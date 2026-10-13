@@ -25,22 +25,18 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
 export default function HomePage() {
-  const [memberCount, setMemberCount] = useState<number>(() => getMembers().length);
+  const [memberCount, setMemberCount] = useState<number>(0);
   const [formationsCount, setFormationsCount] = useState<number>(() => getFormations().length);
   const [opportunitiesCount, setOpportunitiesCount] = useState<number>(() => getOpportunities().length);
   const [projectsCount, setProjectsCount] = useState<number>(() => getProjects().length);
 
   useEffect(() => {
-    // 1. Charger depuis le store local
-    const localMembers = getMembers();
-    setMemberCount(localMembers.length);
-
-    // 2. Récupérer le nombre de membres validés/actifs depuis l'API centrale
+    // Récupérer le nombre de membres validés/actifs depuis la base de données
     async function fetchDatabaseCounts() {
       try {
         const res = await fetch('/api/members');
         const data = await res.json();
-        if (data.success && typeof data.count === 'number' && data.count > 0) {
+        if (data.success && typeof data.count === 'number') {
           setMemberCount(data.count);
         }
       } catch (e) {

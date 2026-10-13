@@ -79,7 +79,7 @@ export function InscriptionForm() {
 
           let member: Profile;
           try {
-            // Enregistrement central dans Supabase avec calcul du prochain numéro d'adhérent unique
+            // Validation et enregistrement direct en base de données Supabase
             const apiRes = await fetch('/api/members', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -91,32 +91,37 @@ export function InscriptionForm() {
                 address: parsedReg.address,
                 profession: parsedReg.profession,
                 avatar_url: parsedReg.avatar_url,
+                payment_ref: savedRef,
+                payment_method: parsedReg.payment_method || 'Wave',
               }),
             });
             const apiData = await apiRes.json();
             if (apiData.success && apiData.member) {
-              member = addMember(apiData.member);
+              member = apiData.member;
             } else {
-              member = addMember({
-                first_name: (parsedReg.first_name || '').trim(),
-                last_name: (parsedReg.last_name || '').trim(),
-                email: autoEmail,
-                phone: parsedReg.phone || '',
-                address: parsedReg.address || 'Commune de Kelle',
-                profession: parsedReg.profession || 'Membre AJPK',
-                avatar_url: parsedReg.avatar_url || '',
-              });
+              throw new Error(apiData.message || 'Erreur enregistrement');
             }
           } catch {
-            member = addMember({
+            member = {
+              id: `usr-${Date.now()}`,
               first_name: (parsedReg.first_name || '').trim(),
               last_name: (parsedReg.last_name || '').trim(),
               email: autoEmail,
               phone: parsedReg.phone || '',
+              member_number: 'AJPK-00000',
               address: parsedReg.address || 'Commune de Kelle',
               profession: parsedReg.profession || 'Membre AJPK',
               avatar_url: parsedReg.avatar_url || '',
-            });
+              date_of_birth: '',
+              sex: 'M',
+              education_level: 'Membre AJPK',
+              bio: '',
+              role: 'member',
+              status: 'actif',
+              created_at: new Date().toISOString(),
+              skills: [],
+              interest_domains: [],
+            };
           }
 
           setCurrentUser(member);
@@ -268,32 +273,37 @@ export function InscriptionForm() {
               address: parsedReg.address,
               profession: parsedReg.profession,
               avatar_url: parsedReg.avatar_url,
+              payment_ref: savedRef,
+              payment_method: parsedReg.payment_method || 'Wave',
             }),
           });
           const apiData = await apiRes.json();
           if (apiData.success && apiData.member) {
-            member = addMember(apiData.member);
+            member = apiData.member;
           } else {
-            member = addMember({
-              first_name: (parsedReg.first_name || '').trim(),
-              last_name: (parsedReg.last_name || '').trim(),
-              email: autoEmail,
-              phone: parsedReg.phone || '',
-              address: parsedReg.address || 'Commune de Kelle',
-              profession: parsedReg.profession || 'Membre AJPK',
-              avatar_url: parsedReg.avatar_url || '',
-            });
+            throw new Error(apiData.message || 'Erreur');
           }
         } catch {
-          member = addMember({
+          member = {
+            id: `usr-${Date.now()}`,
             first_name: (parsedReg.first_name || '').trim(),
             last_name: (parsedReg.last_name || '').trim(),
             email: autoEmail,
             phone: parsedReg.phone || '',
+            member_number: 'AJPK-00000',
             address: parsedReg.address || 'Commune de Kelle',
             profession: parsedReg.profession || 'Membre AJPK',
             avatar_url: parsedReg.avatar_url || '',
-          });
+            date_of_birth: '',
+            sex: 'M',
+            education_level: 'Membre AJPK',
+            bio: '',
+            role: 'member',
+            status: 'actif',
+            created_at: new Date().toISOString(),
+            skills: [],
+            interest_domains: [],
+          };
         }
 
         setCurrentUser(member);
