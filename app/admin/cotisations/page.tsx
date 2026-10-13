@@ -367,7 +367,7 @@ export default function AdminCotisationsPage() {
       {/* Main Table */}
       <div className="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
+          <table className="w-full text-left text-xs text-slate-300 min-w-[760px]">
             <thead className="bg-slate-800/90 text-slate-400 uppercase font-extrabold text-[10px] tracking-wider border-b border-slate-700">
               <tr>
                 <th className="px-6 py-4">Membre</th>

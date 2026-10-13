@@ -142,49 +142,49 @@ export default function AdminMembresPage() {
       )}
 
       {/* Cartes Statistiques Récapitulatives */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="p-3 sm:p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase">Membres Officiels</span>
-            <Users className="w-4 h-4 text-brand-400" />
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase truncate">Membres Officiels</span>
+            <Users className="w-4 h-4 text-brand-400 shrink-0" />
           </div>
-          <p className="text-2xl font-black text-white">{members.length}</p>
-          <p className="text-[10px] text-slate-500">19 adhérents + 1 administrateur</p>
+          <p className="text-xl sm:text-2xl font-black text-white">{members.length}</p>
+          <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">19 adhérents + 1 admin</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/20 space-y-1">
+        <div className="p-3 sm:p-4 rounded-2xl bg-slate-900 border border-emerald-500/20 space-y-1">
           <div className="flex items-center justify-between text-emerald-400">
-            <span className="text-[11px] font-bold uppercase">Paiements Validés</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase truncate">Paiements Validés</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
           </div>
-          <p className="text-2xl font-black text-emerald-400">{completedTxCount}</p>
-          <p className="text-[10px] text-emerald-500/80">Adhésions Wave & Orange Money</p>
+          <p className="text-xl sm:text-2xl font-black text-emerald-400">{completedTxCount}</p>
+          <p className="text-[9px] sm:text-[10px] text-emerald-500/80 truncate">Wave & Orange Money</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900 border border-brand-500/20 space-y-1">
+        <div className="p-3 sm:p-4 rounded-2xl bg-slate-900 border border-brand-500/20 space-y-1">
           <div className="flex items-center justify-between text-brand-400">
-            <span className="text-[11px] font-bold uppercase">Fonds Collectés</span>
-            <DollarSign className="w-4 h-4 text-brand-400" />
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase truncate">Fonds Collectés</span>
+            <DollarSign className="w-4 h-4 text-brand-400 shrink-0" />
           </div>
-          <p className="text-2xl font-black text-white">{formatFCFA(totalCollected)}</p>
-          <p className="text-[10px] text-slate-500">{completedTxCount} adhésions × 1 050 FCFA</p>
+          <p className="text-lg sm:text-2xl font-black text-white tracking-tight">{formatFCFA(totalCollected)}</p>
+          <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">{completedTxCount} × 1 050 FCFA</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900 border border-amber-500/20 space-y-1">
+        <div className="p-3 sm:p-4 rounded-2xl bg-slate-900 border border-amber-500/20 space-y-1">
           <div className="flex items-center justify-between text-amber-400">
-            <span className="text-[11px] font-bold uppercase">En attente Unitech</span>
-            <Clock className="w-4 h-4 text-amber-400" />
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase truncate">En attente</span>
+            <Clock className="w-4 h-4 text-amber-400 shrink-0" />
           </div>
-          <p className="text-2xl font-black text-amber-400">{pendingTxCount}</p>
-          <p className="text-[10px] text-slate-500">Paiements en attente de débit</p>
+          <p className="text-xl sm:text-2xl font-black text-amber-400">{pendingTxCount}</p>
+          <p className="text-[9px] sm:text-[10px] text-slate-500 truncate">En attente de débit</p>
         </div>
       </div>
 
       {/* Onglets de Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto whitespace-nowrap">
         <button
           onClick={() => setActiveTab('members')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 ${
+          className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 shrink-0 ${
             activeTab === 'members'
               ? 'bg-brand-600 text-white shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -196,20 +196,20 @@ export default function AdminMembresPage() {
 
         <button
           onClick={() => setActiveTab('transactions')}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 ${
+          className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-2 shrink-0 ${
             activeTab === 'transactions'
               ? 'bg-brand-600 text-white shadow-md'
               : 'text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span>Transactions & Paiements Unitech Pay ({transactions.length})</span>
+          <span>Transactions & Paiements ({transactions.length})</span>
         </button>
       </div>
 
       {/* Recherche */}
       <div className="flex items-center gap-2 p-2.5 bg-slate-900 rounded-2xl border border-slate-800 max-w-md">
-        <Search className="w-4 h-4 text-slate-400 ml-2" />
+        <Search className="w-4 h-4 text-slate-400 ml-2 shrink-0" />
         <input
           type="text"
           placeholder={
@@ -227,7 +227,7 @@ export default function AdminMembresPage() {
       {activeTab === 'members' && (
         <div className="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
+            <table className="w-full text-left text-xs text-slate-300 min-w-[680px]">
               <thead className="bg-slate-800 text-slate-400 uppercase font-bold text-[10px] tracking-wider">
                 <tr>
                   <th className="px-6 py-4">Membre</th>
@@ -333,7 +333,7 @@ export default function AdminMembresPage() {
       {activeTab === 'transactions' && (
         <div className="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
+            <table className="w-full text-left text-xs text-slate-300 min-w-[720px]">
               <thead className="bg-slate-800 text-slate-400 uppercase font-bold text-[10px] tracking-wider">
                 <tr>
                   <th className="px-6 py-4">Client / Adhérent</th>

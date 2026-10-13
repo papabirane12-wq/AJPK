@@ -378,8 +378,8 @@ export function InscriptionForm() {
           Photo d’identité pour votre carte * <span className="text-slate-400 font-normal">(Visage net, fond neutre recommandé)</span>
         </label>
 
-        <div className="flex items-center gap-5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700">
-          <div className="relative w-24 h-28 rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 flex items-center justify-center shrink-0 border-2 border-brand-500/40 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 text-center sm:text-left">
+          <div className="relative w-24 h-28 rounded-2xl overflow-hidden bg-slate-200 dark:bg-slate-800 flex items-center justify-center shrink-0 border-2 border-brand-500/40 shadow-sm mx-auto sm:mx-0">
             {isCompressingPhoto ? (
               <div className="flex flex-col items-center justify-center p-2 text-center text-brand-600">
                 <Loader2 className="w-6 h-6 animate-spin mb-1" />
@@ -395,7 +395,7 @@ export function InscriptionForm() {
             )}
           </div>
 
-          <div className="space-y-2 flex-1">
+          <div className="space-y-2 flex-1 w-full flex flex-col items-center sm:items-start">
             <input
               ref={fileInputRef}
               type="file"
@@ -407,7 +407,7 @@ export function InscriptionForm() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isCompressingPhoto}
-              className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition disabled:opacity-50"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition disabled:opacity-50"
             >
               <Upload className="w-4 h-4" /> {avatarPreview ? 'Changer ma photo' : 'Importer ma photo depuis l’appareil'}
             </button>

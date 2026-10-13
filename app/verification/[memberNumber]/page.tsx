@@ -35,8 +35,8 @@ export default function VerificationPage() {
   }, [rawNum]);
 
   return (
-    <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <div className="bg-white dark:bg-slate-850 p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl space-y-6 text-center">
+    <div className="max-w-xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-16">
+      <div className="bg-white dark:bg-slate-850 p-4 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl space-y-5 sm:space-y-6 text-center">
         
         {isLoading ? (
           <div className="py-12 space-y-3">

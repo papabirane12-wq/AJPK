@@ -103,8 +103,8 @@ export default function ConnexionPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <div className="bg-white dark:bg-slate-850 p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
+    <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+      <div className="bg-white dark:bg-slate-850 p-5 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-5 sm:space-y-6">
         
         <div className="text-center">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-amber-500 text-white mx-auto flex items-center justify-center font-extrabold text-lg shadow-md mb-3">

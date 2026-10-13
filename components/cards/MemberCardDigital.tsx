@@ -18,40 +18,40 @@ export function MemberCardDigital({ member, showActions = true }: MemberCardDigi
     : `https://ajpk.sn/verification/${member.member_number}`;
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-auto w-full">
       {/* Credit Card / Badge Container */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-brand-950 to-slate-950 p-6 text-white shadow-2xl border border-emerald-500/30">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-brand-950 to-slate-950 p-4 sm:p-6 text-white shadow-2xl border border-emerald-500/30">
         
         {/* Holographic glowing blobs */}
         <div className="absolute -top-16 -right-16 w-44 h-44 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-16 -left-16 w-44 h-44 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
         {/* Card Header */}
-        <div className="flex items-center justify-between relative z-10 border-b border-white/10 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-auto flex items-center justify-center">
+        <div className="flex items-center justify-between relative z-10 border-b border-white/10 pb-3 sm:pb-4 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-9 sm:h-10 w-auto flex items-center justify-center shrink-0">
               <img
                 src="/logo.png"
                 alt="Logo AJPK"
-                className="h-8 w-auto object-contain brightness-110 drop-shadow"
+                className="h-7 sm:h-8 w-auto object-contain brightness-110 drop-shadow"
               />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm tracking-wide text-white uppercase">Carte de Membre</h3>
-              <p className="text-[10px] text-gold-400 font-semibold tracking-wider">Association de la Jeunesse Polyvalente de Kelle</p>
+              <h3 className="font-extrabold text-xs sm:text-sm tracking-wide text-white uppercase">Carte de Membre</h3>
+              <p className="text-[9px] sm:text-[10px] text-gold-400 font-semibold tracking-wider">AJPK Kelle, Sénégal</p>
             </div>
           </div>
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+          <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 shrink-0">
             <ShieldCheck className="w-3 h-3" /> Valide
           </span>
         </div>
 
         {/* Card Body */}
-        <div className="my-6 grid grid-cols-3 gap-4 items-center relative z-10">
+        <div className="my-4 sm:my-6 grid grid-cols-3 gap-3 sm:gap-4 items-center relative z-10">
           
           {/* Member Photo */}
           <div className="col-span-1">
-            <div className="w-24 h-28 rounded-2xl overflow-hidden ring-2 ring-emerald-500/50 shadow-md bg-slate-800 flex items-center justify-center">
+            <div className="w-20 h-24 sm:w-24 sm:h-28 rounded-2xl overflow-hidden ring-2 ring-emerald-500/50 shadow-md bg-slate-800 flex items-center justify-center">
               {member.avatar_url && !imgError ? (
                 <img
                   src={member.avatar_url}
