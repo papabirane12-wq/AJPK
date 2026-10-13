@@ -37,7 +37,20 @@ export async function GET() {
       );
     }
 
-    const rawList: any[] = data.data?.transactions || [];
+    // Filtrer STRICTEMENT les transactions AJPK (1 050 FCFA ou description contenant AJPK)
+    // afin d'écarter les transactions externes du compte Unitech (ex: abonnements TEKBIZ)
+    const rawList: any[] = (data.data?.transactions || []).filter((t: any) => {
+      const amount = parseFloat(t.amount);
+      const is1050 = amount === 1050;
+      let isAjpkMeta = false;
+      try {
+        const meta = typeof t.metadata === 'string' ? JSON.parse(t.metadata) : t.metadata;
+        if (meta?.description && /AJPK/i.test(meta.description)) isAjpkMeta = true;
+      } catch {
+        if (t.metadata && /AJPK/i.test(String(t.metadata))) isAjpkMeta = true;
+      }
+      return is1050 || isAjpkMeta;
+    });
 
     const formatted: UnitechTransactionItem[] = rawList.map((t) => {
       let customerName = 'Adhérent Inconnu';

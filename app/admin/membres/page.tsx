@@ -94,9 +94,10 @@ export default function AdminMembresPage() {
     t.reference.toLowerCase().includes(search.toLowerCase())
   );
 
-  const completedTxCount = transactions.filter((t) => t.status === 'completed').length;
+  const completedTxList = transactions.filter((t) => t.status === 'completed');
+  const completedTxCount = completedTxList.length;
   const pendingTxCount = transactions.filter((t) => t.status === 'pending').length;
-  const totalCollected = completedTxCount * 1050;
+  const totalCollected = completedTxList.reduce((sum, t) => sum + (t.amount || 1050), 0);
 
   return (
     <div className="space-y-6">
@@ -148,7 +149,7 @@ export default function AdminMembresPage() {
             <Users className="w-4 h-4 text-brand-400" />
           </div>
           <p className="text-2xl font-black text-white">{members.length}</p>
-          <p className="text-[10px] text-slate-500">Inscrits avec n° d’adhérent</p>
+          <p className="text-[10px] text-slate-500">19 adhérents + 1 administrateur</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/20 space-y-1">
@@ -157,7 +158,7 @@ export default function AdminMembresPage() {
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-emerald-400">{completedTxCount}</p>
-          <p className="text-[10px] text-emerald-500/80">Via Wave & Orange Money</p>
+          <p className="text-[10px] text-emerald-500/80">Adhésions Wave & Orange Money</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-900 border border-brand-500/20 space-y-1">
@@ -166,7 +167,7 @@ export default function AdminMembresPage() {
             <DollarSign className="w-4 h-4 text-brand-400" />
           </div>
           <p className="text-2xl font-black text-white">{formatFCFA(totalCollected)}</p>
-          <p className="text-[10px] text-slate-500">1 050 FCFA par adhérent</p>
+          <p className="text-[10px] text-slate-500">{completedTxCount} adhésions × 1 050 FCFA</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-900 border border-amber-500/20 space-y-1">
@@ -175,7 +176,7 @@ export default function AdminMembresPage() {
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
           <p className="text-2xl font-black text-amber-400">{pendingTxCount}</p>
-          <p className="text-[10px] text-slate-500">Paiements en cours de confirmation</p>
+          <p className="text-[10px] text-slate-500">Paiements en attente de débit</p>
         </div>
       </div>
 
