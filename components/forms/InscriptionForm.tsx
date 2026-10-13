@@ -561,7 +561,7 @@ export function InscriptionForm() {
               alt={paymentMethod === 'wave' ? 'Wave' : 'Orange Money'}
               className="w-6 h-6 object-contain rounded-md bg-white p-0.5 shadow-sm shrink-0"
             />
-            <span>Payer 1 050 FCFA avec {paymentMethod === 'wave' ? 'Wave Sénégal' : 'Orange Money'}</span>
+            <span>Valider</span>
           </>
         )}
       </button>
