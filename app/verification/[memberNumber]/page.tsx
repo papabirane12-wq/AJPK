@@ -1,24 +1,49 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { getMembers } from '@/lib/data/store';
-import { ShieldCheck, CheckCircle2, AlertTriangle, Building, Calendar } from 'lucide-react';
+import { Profile } from '@/types';
+import { CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { formatDateFr } from '@/lib/utils/formatters';
 
 export default function VerificationPage() {
   const params = useParams();
-  const rawNum = params.memberNumber as string;
-  const members = getMembers();
+  const rawNum = (params?.memberNumber as string) || '';
+  const [member, setMember] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Find member by number
-  const member = members.find(m => m.member_number.toLowerCase() === rawNum.toLowerCase() || m.id === rawNum);
+  useEffect(() => {
+    if (!rawNum) {
+      setIsLoading(false);
+      return;
+    }
+
+    fetch('/api/members')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.members)) {
+          const found = data.members.find(
+            (m: Profile) =>
+              m.member_number.toLowerCase() === rawNum.toLowerCase() ||
+              m.id.toLowerCase() === rawNum.toLowerCase()
+          );
+          setMember(found || null);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [rawNum]);
 
   return (
     <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      
       <div className="bg-white dark:bg-slate-850 p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl space-y-6 text-center">
         
-        {member ? (
+        {isLoading ? (
+          <div className="py-12 space-y-3">
+            <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mx-auto" />
+            <p className="text-xs font-bold text-slate-500">Vérification de la carte en cours auprès du registre officiel...</p>
+          </div>
+        ) : member ? (
           <>
             <div className="flex justify-center mb-2">
               <img
@@ -84,7 +109,7 @@ export default function VerificationPage() {
             </div>
 
             <p className="text-[10px] text-slate-400 italic">
-              Système de vérification cryptographique AJPK • Foyer des Jeunes de Kelle
+              Système de vérification officiel AJPK • Registre centralisé en direct
             </p>
           </>
         ) : (
@@ -102,7 +127,6 @@ export default function VerificationPage() {
         )}
 
       </div>
-
     </div>
   );
 }
