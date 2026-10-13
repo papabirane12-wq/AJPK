@@ -156,17 +156,13 @@ export default function ConnexionPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-              <span>{role === 'member' ? 'Numéro Adhérent Unique *' : 'Numéro Adhérent Administrateur *'}</span>
-              <span className="text-[10px] text-brand-600 dark:text-emerald-400 font-mono font-bold">
-                {role === 'admin' ? 'Ex: AJPK-00011' : 'Format: AJPK-XXXXX'}
-              </span>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+              {role === 'member' ? 'Numéro Adhérent Unique *' : 'Numéro Adhérent Administrateur *'}
             </label>
             <input
               type="text"
               required
               disabled={isLoading}
-              placeholder={role === 'admin' ? 'AJPK-00011' : undefined}
               value={memberNumber}
               onChange={(e) => setMemberNumber(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50"
