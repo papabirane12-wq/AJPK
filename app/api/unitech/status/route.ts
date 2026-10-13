@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       }, { status: 400 });
     }
 
-    const response = await fetch(`${UNITECH_API_URL}?action=transactions`, {
+    const response = await fetch(`${UNITECH_API_URL}?action=transactions&limit=500`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${UNITECH_API_KEY}`,

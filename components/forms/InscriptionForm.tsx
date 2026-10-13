@@ -77,9 +77,8 @@ export function InscriptionForm() {
           const cleanPhone = (parsedReg.phone || '').replace(/[^0-9]/g, '');
           const autoEmail = `${(parsedReg.first_name || '').toLowerCase().replace(/\s+/g, '')}.${(parsedReg.last_name || '').toLowerCase().replace(/\s+/g, '') || cleanPhone}@ajpk.sn`;
 
-          let member: Profile;
+          // Validation et enregistrement direct en base de données Supabase
           try {
-            // Validation et enregistrement direct en base de données Supabase
             const apiRes = await fetch('/api/members', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -97,38 +96,16 @@ export function InscriptionForm() {
             });
             const apiData = await apiRes.json();
             if (apiData.success && apiData.member) {
-              member = apiData.member;
+              setCurrentUser(apiData.member);
+              setCreatedMember(apiData.member);
+              localStorage.removeItem(PENDING_REF_KEY);
+              localStorage.removeItem(PENDING_REG_KEY);
             } else {
-              throw new Error(apiData.message || 'Erreur enregistrement');
+              setPendingMessage(apiData.message || 'Le paiement n’a pas encore été confirmé par Unitech Pay.');
             }
           } catch {
-            member = {
-              id: `usr-${Date.now()}`,
-              first_name: (parsedReg.first_name || '').trim(),
-              last_name: (parsedReg.last_name || '').trim(),
-              email: autoEmail,
-              phone: parsedReg.phone || '',
-              member_number: 'AJPK-00000',
-              address: parsedReg.address || 'Commune de Kelle',
-              profession: parsedReg.profession || 'Membre AJPK',
-              avatar_url: parsedReg.avatar_url || '',
-              date_of_birth: '',
-              sex: 'M',
-              education_level: 'Membre AJPK',
-              bio: '',
-              role: 'member',
-              status: 'actif',
-              created_at: new Date().toISOString(),
-              skills: [],
-              interest_domains: [],
-            };
+            setPendingMessage('Erreur de connexion lors de la confirmation du membre.');
           }
-
-          setCurrentUser(member);
-          setCreatedMember(member);
-
-          localStorage.removeItem(PENDING_REF_KEY);
-          localStorage.removeItem(PENDING_REG_KEY);
           setVerifyingPending(false);
         } else if (data.status === 'failed') {
           setPendingMessage('Le paiement a été rejeté ou annulé par Unitech Pay. Vous pouvez recommencer.');
@@ -260,7 +237,6 @@ export function InscriptionForm() {
         const cleanPhone = (parsedReg.phone || '').replace(/[^0-9]/g, '');
         const autoEmail = `${(parsedReg.first_name || '').toLowerCase().replace(/\s+/g, '')}.${(parsedReg.last_name || '').toLowerCase().replace(/\s+/g, '') || cleanPhone}@ajpk.sn`;
 
-        let member: Profile;
         try {
           const apiRes = await fetch('/api/members', {
             method: 'POST',
@@ -279,37 +255,16 @@ export function InscriptionForm() {
           });
           const apiData = await apiRes.json();
           if (apiData.success && apiData.member) {
-            member = apiData.member;
+            setCurrentUser(apiData.member);
+            setCreatedMember(apiData.member);
+            localStorage.removeItem(PENDING_REF_KEY);
+            localStorage.removeItem(PENDING_REG_KEY);
           } else {
-            throw new Error(apiData.message || 'Erreur');
+            setPendingMessage(apiData.message || 'Le paiement n’a pas encore été confirmé par Unitech Pay.');
           }
         } catch {
-          member = {
-            id: `usr-${Date.now()}`,
-            first_name: (parsedReg.first_name || '').trim(),
-            last_name: (parsedReg.last_name || '').trim(),
-            email: autoEmail,
-            phone: parsedReg.phone || '',
-            member_number: 'AJPK-00000',
-            address: parsedReg.address || 'Commune de Kelle',
-            profession: parsedReg.profession || 'Membre AJPK',
-            avatar_url: parsedReg.avatar_url || '',
-            date_of_birth: '',
-            sex: 'M',
-            education_level: 'Membre AJPK',
-            bio: '',
-            role: 'member',
-            status: 'actif',
-            created_at: new Date().toISOString(),
-            skills: [],
-            interest_domains: [],
-          };
+          setPendingMessage('Erreur de connexion lors de la confirmation du membre.');
         }
-
-        setCurrentUser(member);
-        setCreatedMember(member);
-        localStorage.removeItem(PENDING_REF_KEY);
-        localStorage.removeItem(PENDING_REG_KEY);
       } else {
         setPendingMessage('Le paiement n’a pas encore été validé par Unitech Pay. Assurez-vous d’avoir confirmé sur Wave / Orange Money.');
       }

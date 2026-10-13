@@ -281,6 +281,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Prénom et nom obligatoires.' }, { status: 400 });
     }
 
+    // Vérification STRICTE auprès d'Unitech Pay : SEULS les paiements validés (status === 'completed' et montant 1 050 FCFA) sont acceptés
+    if (!payment_ref && role !== 'super_admin' && role !== 'admin') {
+      return NextResponse.json({ success: false, message: 'Référence de paiement requise pour valider l’adhésion.' }, { status: 400 });
+    }
+
+    if (payment_ref) {
+      let isVerifiedCompleted = false;
+      try {
+        const checkRes = await fetch(`${UNITECH_API_URL}?action=transactions&limit=500`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${UNITECH_API_KEY}` },
+          cache: 'no-store',
+        });
+        const checkData = await checkRes.json();
+        const transactions: any[] = checkData.data?.transactions || [];
+        const matching = transactions.find(
+          (t: any) => t.reference === payment_ref && t.status === 'completed' && parseFloat(t.amount) === 1050
+        );
+        if (matching) {
+          isVerifiedCompleted = true;
+        }
+      } catch (err) {
+        console.error('Erreur vérification transaction Unitech:', err);
+      }
+
+      if (!isVerifiedCompleted && !LOCKED_MEMBER_REGISTRY[payment_ref]) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Paiement non validé par Unitech Pay. Seuls les paiements validés (1 050 FCFA) peuvent être enregistrés comme membres officiels.',
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
     const cleanEmail = email || `${first_name.toLowerCase().replace(/\s+/g, '')}.${last_name.toLowerCase().replace(/\s+/g, '') || cleanPhone}@ajpk.sn`;
 
