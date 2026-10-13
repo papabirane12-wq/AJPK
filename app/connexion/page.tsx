@@ -166,7 +166,7 @@ export default function ConnexionPage() {
               type="text"
               required
               disabled={isLoading}
-              placeholder={role === 'admin' ? 'AJPK-00011' : 'AJPK-00001'}
+              placeholder={role === 'admin' ? 'AJPK-00011' : undefined}
               value={memberNumber}
               onChange={(e) => setMemberNumber(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50"
