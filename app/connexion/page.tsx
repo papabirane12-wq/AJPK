@@ -4,11 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { setCurrentUser } from '@/lib/data/store';
 import { Profile } from '@/types';
-import { LogIn, ShieldCheck, UserCheck, Loader2 } from 'lucide-react';
+import { LogIn, ShieldCheck, UserCheck, Loader2, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function ConnexionPage() {
   const [role, setRole] = useState<'member' | 'admin'>('member');
   const [memberNumber, setMemberNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -82,7 +84,14 @@ export default function ConnexionPage() {
           setError(`Numéro d’adhérent introuvable. Veuillez vérifier votre numéro unique (ex: AJPK-00001).`);
         }
       } else {
-        // Espace Administration : Vérifier les droits admin ou super_admin
+        // Espace Administration : Vérification obligatoire du mot de passe de sécurité
+        if (password !== 'Agent47') {
+          setError('Mot de passe administrateur incorrect.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Vérifier les droits admin ou super_admin
         if (found) {
           if (found.role === 'admin' || found.role === 'super_admin' || found.member_number === 'AJPK-00011') {
             setCurrentUser(found);
@@ -116,7 +125,7 @@ export default function ConnexionPage() {
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {role === 'member'
               ? 'Connectez-vous à l’aide de votre numéro d’adhérent unique'
-              : 'Accès réservé aux administrateurs via leur numéro d’adhérent'}
+              : 'Accès réservé aux administrateurs (N° adhérent et mot de passe)'}
           </p>
         </div>
 
@@ -132,7 +141,7 @@ export default function ConnexionPage() {
             <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
               <button
                 type="button"
-                onClick={() => { setRole('member'); setError(''); setMemberNumber(''); }}
+                onClick={() => { setRole('member'); setError(''); setMemberNumber(''); setPassword(''); }}
                 className={`py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                   role === 'member'
                     ? 'bg-white dark:bg-slate-900 text-brand-700 dark:text-emerald-400 shadow-sm'
@@ -143,7 +152,7 @@ export default function ConnexionPage() {
               </button>
               <button
                 type="button"
-                onClick={() => { setRole('admin'); setError(''); setMemberNumber(''); }}
+                onClick={() => { setRole('admin'); setError(''); setMemberNumber(''); setPassword(''); }}
                 className={`py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                   role === 'admin'
                     ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm'
@@ -168,6 +177,35 @@ export default function ConnexionPage() {
               className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-mono font-bold text-slate-900 dark:text-white uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50"
             />
           </div>
+
+          {role === 'admin' && (
+            <div className="space-y-2 animate-fade-in">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                <span>Mot de passe administrateur *</span>
+                <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Accès sécurisé
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  disabled={isLoading}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50 pr-11"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1 rounded-lg"
+                  title={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"
