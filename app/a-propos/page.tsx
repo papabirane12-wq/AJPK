@@ -91,29 +91,29 @@ export default function AProposPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="bg-slate-800 p-6 rounded-2xl text-center space-y-2">
             <div className="w-20 h-20 rounded-full mx-auto bg-gradient-to-tr from-brand-600 to-emerald-500 text-white font-extrabold text-xl flex items-center justify-center ring-2 ring-emerald-400">
-              MD
+              AD
             </div>
-            <h4 className="font-extrabold text-base">Moussa Diop</h4>
-            <p className="text-xs text-emerald-400 font-bold">Président Exécutif</p>
-            <p className="text-[11px] text-slate-400">Ingénieur Logiciel & Entrepreneur</p>
+            <h4 className="font-extrabold text-base">Ababacar Ndiaye Diouf</h4>
+            <p className="text-xs text-emerald-400 font-bold">Président</p>
+            <p className="text-[11px] text-slate-400">Président de l’AJPK</p>
           </div>
 
           <div className="bg-slate-800 p-6 rounded-2xl text-center space-y-2">
             <div className="w-20 h-20 rounded-full mx-auto bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-extrabold text-xl flex items-center justify-center ring-2 ring-emerald-400">
-              AN
+              BN
             </div>
-            <h4 className="font-extrabold text-base">Aminata Ndiaye</h4>
-            <p className="text-xs text-emerald-400 font-bold">Vice-Présidente & Comm. Formation</p>
-            <p className="text-[11px] text-slate-400">Experte Marketing & Projet</p>
+            <h4 className="font-extrabold text-base">Banda Niang</h4>
+            <p className="text-xs text-emerald-400 font-bold">Secrétaire Général</p>
+            <p className="text-[11px] text-slate-400">Secrétaire Général de l’AJPK</p>
           </div>
 
           <div className="bg-slate-800 p-6 rounded-2xl text-center space-y-2">
             <div className="w-20 h-20 rounded-full mx-auto bg-gradient-to-tr from-amber-600 to-amber-500 text-white font-extrabold text-xl flex items-center justify-center ring-2 ring-emerald-400">
-              FS
+              BG
             </div>
-            <h4 className="font-extrabold text-base">Fatou Sow</h4>
+            <h4 className="font-extrabold text-base">Bineta Gueye</h4>
             <p className="text-xs text-emerald-400 font-bold">Trésorière Générale</p>
-            <p className="text-[11px] text-slate-400">Comptable & Finance Solidaire</p>
+            <p className="text-[11px] text-slate-400">Trésorière Générale de l’AJPK</p>
           </div>
         </div>
       </div>
