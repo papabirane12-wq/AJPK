@@ -13,9 +13,12 @@ interface MemberCardDigitalProps {
 
 export function MemberCardDigital({ member, showActions = true }: MemberCardDigitalProps) {
   const [imgError, setImgError] = useState(false);
+  // Sécurité renforcée : l'URL encodée dans le QR code utilise l'identifiant interne (member.id)
+  // afin que le numéro d'adhésion privé (identifiant de connexion) ne soit ni lisible au scan ni exposé
+  const secureVerifyId = member.id || member.member_number;
   const verificationUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin.replace(/^http:\/\//i, 'https://')}/verification/${member.member_number}` 
-    : `https://ajpk.sn/verification/${member.member_number}`;
+    ? `${window.location.origin.replace(/^http:\/\//i, 'https://')}/verification/${encodeURIComponent(secureVerifyId)}` 
+    : `https://ajpk.sn/verification/${encodeURIComponent(secureVerifyId)}`;
 
   return (
     <div className="max-w-md mx-auto w-full">

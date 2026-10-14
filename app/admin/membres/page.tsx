@@ -303,7 +303,7 @@ export default function AdminMembresPage() {
 
                       <td className="px-6 py-4 text-right">
                         <Link
-                          href={`/verification/${member.member_number}`}
+                          href={`/verification/${encodeURIComponent(member.id || member.member_number)}`}
                           target="_blank"
                           className="px-3 py-1.5 bg-slate-800 hover:bg-brand-600 text-slate-200 hover:text-white rounded-xl inline-flex items-center gap-1.5 text-[11px] font-bold transition shadow-sm"
                           title="Voir la carte officielle"

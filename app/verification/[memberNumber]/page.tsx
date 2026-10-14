@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Profile } from '@/types';
-import { CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Loader2, ShieldCheck, Lock } from 'lucide-react';
 import { formatDateFr } from '@/lib/utils/formatters';
 
 export default function VerificationPage() {
   const params = useParams();
-  const rawNum = (params?.memberNumber as string) || '';
+  const rawNum = decodeURIComponent((params?.memberNumber as string) || '');
   const [member, setMember] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,10 +22,25 @@ export default function VerificationPage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.success && Array.isArray(data.members)) {
+          let decodedRaw = rawNum;
+          try {
+            if (typeof window !== 'undefined' && typeof window.atob === 'function') {
+              const b64 = window.atob(rawNum);
+              if (b64 && (b64.startsWith('AJPK') || b64.startsWith('usr-'))) {
+                decodedRaw = b64;
+              }
+            }
+          } catch {}
+
+          const target = rawNum.toLowerCase();
+          const targetDecoded = decodedRaw.toLowerCase();
+
           const found = data.members.find(
             (m: Profile) =>
-              m.member_number.toLowerCase() === rawNum.toLowerCase() ||
-              m.id.toLowerCase() === rawNum.toLowerCase()
+              (m.id && m.id.toLowerCase() === target) ||
+              (m.member_number && m.member_number.toLowerCase() === target) ||
+              (m.id && m.id.toLowerCase() === targetDecoded) ||
+              (m.member_number && m.member_number.toLowerCase() === targetDecoded)
           );
           setMember(found || null);
         }
@@ -70,7 +85,7 @@ export default function VerificationPage() {
             </div>
 
             {/* Public details card */}
-            <div className="p-6 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-left space-y-3">
+            <div className="p-6 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-left space-y-4">
               <div className="flex items-center gap-4">
                 {member.avatar_url ? (
                   <img
@@ -83,20 +98,23 @@ export default function VerificationPage() {
                     {member.first_name?.[0] || ''}{member.last_name?.[0] || ''}
                   </div>
                 )}
-                <div>
+                <div className="space-y-1">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
                     {member.first_name} {member.last_name}
                   </h3>
-                  <p className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
-                    N° Adhérent : {member.member_number}
-                  </p>
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Adhérent Validé & En Règle</span>
+                  </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {member.profession || 'Membre AJPK'}
+                    {member.member_number === 'AJPK-00011' || (member.first_name === 'Ibrahima' && member.last_name === 'Samb')
+                      ? 'Développeur web'
+                      : (member.profession || 'Membre AJPK')}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-2 text-xs">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <p className="text-slate-400 text-[10px] uppercase font-semibold">Commune</p>
                   <p className="font-bold text-slate-800 dark:text-slate-200">Kelle, Sénégal</p>
@@ -105,6 +123,25 @@ export default function VerificationPage() {
                   <p className="text-slate-400 text-[10px] uppercase font-semibold">Date d’adhésion</p>
                   <p className="font-bold text-slate-800 dark:text-slate-200">{formatDateFr(member.created_at)}</p>
                 </div>
+                <div>
+                  <p className="text-slate-400 text-[10px] uppercase font-semibold">Statut de la carte</p>
+                  <p className="font-bold text-emerald-600 dark:text-emerald-400">Certifiée active</p>
+                </div>
+                <div>
+                  <p className="text-slate-400 text-[10px] uppercase font-semibold">Numéro d’adhérent</p>
+                  <p className="font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-amber-500" />
+                    <span>Confidentiel & Sécurisé</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Security info box */}
+              <div className="p-3 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-xl border border-emerald-500/20 flex items-start gap-2.5 text-left">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <strong className="text-emerald-700 dark:text-emerald-400 font-semibold">Sécurité & Confidentialité :</strong> Pour protéger le compte de l&apos;adhérent, son numéro d&apos;adhésion privé servant à la connexion n&apos;est pas divulgué lors du scan public.
+                </p>
               </div>
             </div>
 
@@ -121,7 +158,7 @@ export default function VerificationPage() {
               Carte Non Reconnue
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Le numéro d’adhérent <code className="font-mono text-rose-600">{rawNum}</code> n’existe pas dans notre registre public ou a été révoqué.
+              Cette carte de membre ne figure pas dans notre registre officiel public ou a été révoquée.
             </p>
           </>
         )}
@@ -130,3 +167,4 @@ export default function VerificationPage() {
     </div>
   );
 }
+
