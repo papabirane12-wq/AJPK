@@ -73,7 +73,14 @@ export function getCurrentUser(): Profile | null {
     if (user.avatar_url && (user.avatar_url.includes('unsplash') || user.avatar_url.includes('images.unsplash.com'))) {
       user.avatar_url = '';
     }
-    if (user.member_number === 'AJPK-00011' || (user.first_name === 'Ibrahima' && user.last_name === 'Samb')) {
+    if (
+      user.member_number === 'AJPK-00011' ||
+      user.member_number === 'AJPK-100011' ||
+      (user.first_name === 'Ibrahima' && user.last_name === 'Samb')
+    ) {
+      user.id = 'usr-admin-ibrahima-samb';
+      user.first_name = 'Ibrahima';
+      user.last_name = 'Samb';
       user.profession = 'Développeur web';
       user.role = 'super_admin';
       user.member_number = 'AJPK-00011';

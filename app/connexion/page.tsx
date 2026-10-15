@@ -39,18 +39,37 @@ export default function ConnexionPage() {
         membersList = data.members;
       }
 
-      // Recherche du membre par n° adhérent, par téléphone ou par email
+      // 1. Recherche prioritaire et STRICTE par numéro d'adhérent exact (ex: AJPK-00011)
       let found = membersList.find((m) => {
-        const mNum = m.member_number?.toUpperCase() || '';
-        const mPhone = (m.phone || '').replace(/[^0-9]/g, '');
-        const mEmail = (m.email || '').toLowerCase();
-
-        if (mNum === upperInput || mNum === normalizedInput) return true;
-        if (numOnly && mNum.endsWith(numOnly.padStart(5, '0'))) return true;
-        if (numOnly && mPhone && (mPhone === numOnly || mPhone.endsWith(numOnly))) return true;
-        if (mEmail === cleanInput.toLowerCase()) return true;
-        return false;
+        const mNum = (m.member_number || '').trim().toUpperCase();
+        return mNum === upperInput || mNum === normalizedInput;
       });
+
+      // 2. Si l'utilisateur a saisi uniquement des chiffres (ex: "11" ou "00011"), comparaison numérique exacte
+      if (!found && numOnly) {
+        const targetVal = parseInt(numOnly, 10);
+        if (targetVal > 0) {
+          found = membersList.find((m) => {
+            const mVal = parseInt((m.member_number || '').replace(/[^0-9]/g, ''), 10);
+            return mVal === targetVal;
+          });
+        }
+      }
+
+      // 3. Recherche par numéro de téléphone (au moins 8 chiffres pour éviter les faux positifs)
+      if (!found && numOnly && numOnly.length >= 8) {
+        found = membersList.find((m) => {
+          const mPhone = (m.phone || '').replace(/[^0-9]/g, '');
+          return mPhone === numOnly || (numOnly.length >= 9 && mPhone.endsWith(numOnly));
+        });
+      }
+
+      // 4. Recherche par adresse email
+      if (!found && cleanInput.includes('@')) {
+        found = membersList.find((m) => {
+          return (m.email || '').trim().toLowerCase() === cleanInput.toLowerCase();
+        });
+      }
 
       // Cas spécifique de secours pour l'administrateur Ibrahima Samb (AJPK-00011)
       if (!found && (upperInput === 'AJPK-00011' || upperInput === 'AJPK-11' || numOnly === '11' || cleanInput.toLowerCase().includes('ibrahima.samb'))) {

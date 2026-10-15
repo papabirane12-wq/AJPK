@@ -47,6 +47,19 @@ const LOCKED_MEMBER_REGISTRY: Record<string, string> = {
   'wave_6acd702549dc8_1791848485': 'AJPK-00018', // Tanor Dieng
   'wave_6acdfa6311fda_1791883875': 'AJPK-00019', // Cheikhou Niang
   'wave_6ace06e2747e2_1791887074': 'AJPK-00020', // Abdou Karim Ndiaye
+  'wave_6ace14aeab827_1791890606': 'AJPK-00021',
+  'wave_6ace1df8ec072_1791892984': 'AJPK-00022',
+  'wave_6ace33796ff65_1791898489': 'AJPK-00023',
+  'wave_6ace56c1ccdac_1791907521': 'AJPK-00024',
+  'wave_6ace5f782c5cb_1791909752': 'AJPK-00025',
+  'wave_6ace84405ebb7_1791919168': 'AJPK-00026',
+  'wave_6acead7691ffd_1791929718': 'AJPK-00027',
+  'wave_6acebec978266_1791934153': 'AJPK-00028',
+  'wave_6acebef2d9ee5_1791934194': 'AJPK-00029',
+  'wave_6ad0b979563a0_1792063865': 'AJPK-00030',
+  'wave_6ad0b9c63a8c7_1792063942': 'AJPK-00031',
+  'wave_6ad0bb97171ef_1792064407': 'AJPK-00032',
+  'wave_6ad0c56769e8b_1792066919': 'AJPK-00033',
 };
 
 // Profil officiel de l'administrateur Ibrahima Samb
@@ -164,7 +177,7 @@ export async function GET() {
     // 3. Traiter chaque transaction validée
     // Si un numéro est déjà assigné, ON LE GARDE À JAMAIS.
     // Si c'est un nouveau membre en production, on lui assigne le prochain numéro disponible et on le sauvegarde en base.
-    let nextAvailableNum = Math.max(...Array.from(assignedNumbers).filter((n) => !isNaN(n) && n > 0)) + 1;
+    let nextAvailableNum = Math.max(...Array.from(assignedNumbers).filter((n) => !isNaN(n) && n > 0 && n < 50000), 10) + 1;
 
     const validatedMembersMap = new Map<string, Profile>();
 
@@ -347,7 +360,7 @@ export async function POST(request: Request) {
         console.error(e);
       }
 
-      const maxNum = Math.max(...existingNums.filter((n) => !isNaN(n) && n > 0));
+      const maxNum = Math.max(...existingNums.filter((n) => !isNaN(n) && n > 0 && n < 50000), 10);
       let nextNum = maxNum + 1;
       if (nextNum === 11) nextNum = 12;
       member_number = `AJPK-${String(nextNum).padStart(5, '0')}`;
