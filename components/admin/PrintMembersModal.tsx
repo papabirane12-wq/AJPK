@@ -169,7 +169,7 @@ export function PrintMembersModal({ isOpen, onClose, members }: PrintMembersModa
                       ASSOCIATION DE LA JEUNESSE POLYVALENTE DE KELLÉ (AJPK)
                     </h1>
                     <p className="text-[11px] font-semibold text-emerald-800">
-                      Commune de Kellé • Département de Thiès • Sénégal
+                      Commune de Yene • Village de Kelle
                     </p>
                   </div>
                 </div>
