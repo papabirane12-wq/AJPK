@@ -41,7 +41,301 @@ export function PrintMembersModal({ isOpen, onClose, members }: PrintMembersModa
   }, [members, sortBy]);
 
   const handlePrint = () => {
-    window.print();
+    const logoUrl = typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : '/logo.png';
+
+    // Créer ou réutiliser un iframe caché dédié exclusivement à l'impression
+    let iframe = document.getElementById('ajpk-print-iframe') as HTMLIFrameElement;
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'ajpk-print-iframe';
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      iframe.style.opacity = '0';
+      document.body.appendChild(iframe);
+    }
+
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (!doc) {
+      window.print();
+      return;
+    }
+
+    doc.open();
+    doc.write(`<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>${customTitle} - AJPK</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm 12mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 10pt;
+      line-height: 1.35;
+    }
+    .print-container {
+      width: 100%;
+      margin: 0 auto;
+    }
+    .header-box {
+      border-bottom: 2.5px solid #047857;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+    .header-titles h1 {
+      font-size: 12pt;
+      font-weight: 900;
+      margin: 0;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .header-titles p {
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: #047857;
+      margin: 3px 0 0 0;
+    }
+    .header-right {
+      text-align: right;
+      font-size: 8.5pt;
+      color: #475569;
+    }
+    .header-right .total-badge {
+      font-size: 9.5pt;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 2px;
+    }
+    .title-banner {
+      text-align: center;
+      margin: 12px 0 16px 0;
+      padding: 8px 0;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .title-banner h2 {
+      font-size: 13pt;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0;
+      color: #0f172a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5pt;
+    }
+    th {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 8pt;
+      letter-spacing: 0.5px;
+      padding: 7px 10px;
+      border-bottom: 2px solid #0f172a;
+      border-top: 1px solid #cbd5e1;
+      text-align: left;
+    }
+    th.num-cell, td.num-cell {
+      width: 42px;
+      text-align: center;
+    }
+    td {
+      padding: 5.5px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #1e293b;
+    }
+    tr:nth-child(even) td {
+      background-color: #f8fafc !important;
+    }
+    tr {
+      page-break-inside: avoid;
+    }
+    .firstname {
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #1e293b;
+    }
+    .lastname {
+      font-weight: 900;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+    .emargement-box {
+      width: 75px;
+      height: 18px;
+      border: 1px dashed #94a3b8;
+      border-radius: 3px;
+      margin: 0 auto;
+    }
+    .two-cols-grid {
+      display: flex;
+      gap: 18px;
+    }
+    .two-cols-half {
+      flex: 1;
+    }
+    .footer-box {
+      margin-top: 24px;
+      padding-top: 8px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 8pt;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="print-container">
+    <div class="header-box">
+      <div class="header-left">
+        <img src="${logoUrl}" alt="AJPK" class="header-logo" />
+        <div class="header-titles">
+          <h1>ASSOCIATION DE LA JEUNESSE POLYVALENTE DE KELLÉ (AJPK)</h1>
+          <p>Commune de Yene • Village de Kelle</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div>Date : ${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+        <div class="total-badge">Total : ${sortedMembers.length} Membres</div>
+      </div>
+    </div>
+
+    <div class="title-banner">
+      <h2>${customTitle}</h2>
+    </div>
+
+    ${twoColumnsLayout ? `
+      <div class="two-cols-grid">
+        <div class="two-cols-half">
+          <table>
+            <thead>
+              <tr>
+                <th class="num-cell">N°</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                ${includeSignatureColumn ? '<th style="text-align:center; width:90px;">Émargement</th>' : ''}
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedMembers.slice(0, Math.ceil(sortedMembers.length / 2)).map((m, idx) => `
+                <tr>
+                  <td class="num-cell font-mono">${idx + 1}</td>
+                  <td class="firstname">${m.first_name || ''}</td>
+                  <td class="lastname">${m.last_name || ''}</td>
+                  ${includeSignatureColumn ? '<td style="text-align:center;"><div class="emargement-box"></div></td>' : ''}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="two-cols-half">
+          <table>
+            <thead>
+              <tr>
+                <th class="num-cell">N°</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                ${includeSignatureColumn ? '<th style="text-align:center; width:90px;">Émargement</th>' : ''}
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedMembers.slice(Math.ceil(sortedMembers.length / 2)).map((m, idx) => `
+                <tr>
+                  <td class="num-cell font-mono">${Math.ceil(sortedMembers.length / 2) + idx + 1}</td>
+                  <td class="firstname">${m.first_name || ''}</td>
+                  <td class="lastname">${m.last_name || ''}</td>
+                  ${includeSignatureColumn ? '<td style="text-align:center;"><div class="emargement-box"></div></td>' : ''}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ` : `
+      <table>
+        <thead>
+          <tr>
+            <th class="num-cell">N°</th>
+            <th style="width: 45%;">Prénom</th>
+            <th style="width: 45%;">Nom de Famille</th>
+            ${includeSignatureColumn ? '<th style="text-align:center; width: 110px;">Émargement</th>' : ''}
+          </tr>
+        </thead>
+        <tbody>
+          ${sortedMembers.map((m, idx) => `
+            <tr>
+              <td class="num-cell font-mono">${idx + 1}</td>
+              <td class="firstname">${m.first_name || ''}</td>
+              <td class="lastname">${m.last_name || ''}</td>
+              ${includeSignatureColumn ? '<td style="text-align:center;"><div class="emargement-box"></div></td>' : ''}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `}
+
+    <div class="footer-box">
+      <span>Association de la Jeunesse Polyvalente de Kellé (AJPK)</span>
+      <span>« Kellé moo ñu ñoor ! »</span>
+      <span>https://ajpk.sn</span>
+    </div>
+  </div>
+</body>
+</html>`);
+    doc.close();
+
+    const doPrint = () => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } catch (err) {
+        console.error(err);
+        window.print();
+      }
+    };
+
+    const img = doc.querySelector('img');
+    if (img && !img.complete) {
+      img.onload = () => setTimeout(doPrint, 80);
+      img.onerror = () => setTimeout(doPrint, 80);
+    } else {
+      setTimeout(doPrint, 100);
+    }
   };
 
   if (!isOpen) return null;
