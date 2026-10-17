@@ -20,7 +20,8 @@ import {
   Settings,
   ChevronRight,
   Menu,
-  X
+  X,
+  MessageCircle
 } from 'lucide-react';
 
 export function AdminSidebar() {
@@ -30,6 +31,7 @@ export function AdminSidebar() {
   const links = [
     { name: 'Vue générale', href: '/admin', icon: LayoutDashboard },
     { name: 'Membres AJPK', href: '/admin/membres', icon: Users },
+    { name: 'Diffusion WhatsApp', href: '/admin/communication', icon: MessageCircle },
     { name: 'Événements', href: '/admin/evenements', icon: Calendar },
     { name: 'Formations', href: '/admin/formations', icon: BookOpen },
     { name: 'Opportunités', href: '/admin/opportunites', icon: Briefcase },
