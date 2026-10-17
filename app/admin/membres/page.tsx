@@ -19,11 +19,9 @@ import {
   AlertCircle,
   ExternalLink,
   DollarSign,
-  MessageCircle,
   Printer
 } from 'lucide-react';
 import Link from 'next/link';
-import { WhatsAppBroadcastModal } from '@/components/admin/WhatsAppBroadcastModal';
 import { PrintMembersModal } from '@/components/admin/PrintMembersModal';
 
 interface UnitechTx {
@@ -47,7 +45,6 @@ export default function AdminMembresPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState('');
   const [search, setSearch] = useState('');
-  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const loadData = async (triggerSync = false) => {
@@ -145,15 +142,6 @@ export default function AdminMembresPage() {
           >
             <Printer className="w-4 h-4 text-emerald-400" />
             <span>Imprimer la Liste</span>
-          </button>
-
-          <button
-            onClick={() => setIsWhatsAppModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/50 flex items-center gap-2 transition"
-            title="Informer tous les membres par message WhatsApp"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span>Diffuser sur WhatsApp</span>
           </button>
         </div>
       </div>
@@ -297,22 +285,7 @@ export default function AdminMembresPage() {
                       </td>
 
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-slate-200">{member.phone || '-'}</p>
-                          {member.phone && (
-                            <a
-                              href={`https://wa.me/${member.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                                `Salam aleykoum ${member.first_name}, concernant l'AJPK (École Maternelle de Kellé)...`
-                              )}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition flex items-center justify-center shrink-0"
-                              title={`Envoyer un message WhatsApp à ${member.first_name}`}
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                            </a>
-                          )}
-                        </div>
+                        <p className="font-semibold text-slate-200">{member.phone || '-'}</p>
                         <p className="text-[10px] text-slate-400">{member.email}</p>
                       </td>
 
@@ -453,13 +426,6 @@ export default function AdminMembresPage() {
           </div>
         </div>
       )}
-
-      {/* Modal de Diffusion WhatsApp */}
-      <WhatsAppBroadcastModal
-        isOpen={isWhatsAppModalOpen}
-        onClose={() => setIsWhatsAppModalOpen(false)}
-        members={members}
-      />
 
       {/* Modal d'Impression de la Liste des Membres (Prénom & Nom) */}
       <PrintMembersModal

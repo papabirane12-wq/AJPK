@@ -24,7 +24,6 @@ export function PrintMembersModal({ isOpen, onClose, members }: PrintMembersModa
   const [includeSignatureColumn, setIncludeSignatureColumn] = useState(false);
   const [twoColumnsLayout, setTwoColumnsLayout] = useState(false);
   const [customTitle, setCustomTitle] = useState('LISTE OFFICIELLE DES MEMBRES');
-  const [subtitle, setSubtitle] = useState('Journée Citoyenne - École Maternelle de Kellé');
 
   // Tri des membres
   const sortedMembers = useMemo(() => {
@@ -81,7 +80,7 @@ export function PrintMembersModal({ isOpen, onClose, members }: PrintMembersModa
 
         {/* Options de personnalisation avant impression (No-print) */}
         <div className="p-4 sm:px-6 bg-slate-950/50 border-b border-slate-800 space-y-3 no-print">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             
             {/* Tri */}
             <div>
@@ -110,20 +109,6 @@ export function PrintMembersModal({ isOpen, onClose, members }: PrintMembersModa
                 onChange={(e) => setCustomTitle(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
                 placeholder="Ex: LISTE DES MEMBRES"
-              />
-            </div>
-
-            {/* Sous-titre / Événement */}
-            <div>
-              <label className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">
-                Sous-titre / Occasion
-              </label>
-              <input
-                type="text"
-                value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
-                placeholder="Ex: École Maternelle de Kellé"
               />
             </div>
 
@@ -200,11 +185,6 @@ export function PrintMembersModal({ isOpen, onClose, members }: PrintMembersModa
                 <h2 className="text-lg font-black tracking-wider text-slate-900 uppercase">
                   {customTitle}
                 </h2>
-                {subtitle && (
-                  <p className="text-xs font-bold text-emerald-700 mt-0.5">
-                    {subtitle}
-                  </p>
-                )}
               </div>
             </div>
 
